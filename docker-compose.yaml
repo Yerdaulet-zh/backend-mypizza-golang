@@ -17,6 +17,18 @@ services:
       - default
     restart: unless-stopped
 
+  alloy:
+    image: grafana/otel-alloy:v1.11.0
+    container_name: alloy
+    ports:
+      - "4319:4317"
+      - "4320:4318"
+    environment:
+      - OTEL_RESOURCE_ATTRIBUTES=service.name=mypizza-backend
+    networks:
+      - default
+    restart: unless-stopped
+
   redis:
     image: redis:8.6.1-alpine
     container_name: redis
