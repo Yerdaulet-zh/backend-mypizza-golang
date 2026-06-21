@@ -8,13 +8,16 @@ import (
 	"syscall"
 
 	"github.com/yerdauletzhumabay/backend-mypizza-golang/cmd/server"
+	"github.com/yerdauletzhumabay/backend-mypizza-golang/internal/adapters/logging"
 )
 
 func main() {
 	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer cancel()
 
-	fmt.Println("The server is starting!")
+	logger := logging.NewStdoutAdapter()
+
+	logger.Info("The server is starting!")
 
 	managementRoutes := server.MapManagementRoutes()
 
@@ -23,5 +26,5 @@ func main() {
 		os.Exit(1)
 	}
 
-	fmt.Println(ctx, "Application exited cleanly")
+	logger.Info("Application exited cleanly")
 }
