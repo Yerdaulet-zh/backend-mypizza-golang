@@ -41,7 +41,7 @@ func MapBusinessRoutes(logger ports.Logger, tracer *trace.TracerProvider, rdb po
 	mux := http.NewServeMux()
 
 	// notification := handlers.NewNotificationHandler(NotificationService, logger)
-	mux.HandleFunc("POST /v1/notification/email", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("GET /v1/notification/email", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprint(w, "Welcome to my secure server!")
 	})
 
