@@ -2,6 +2,7 @@ package ports
 
 import (
 	"context"
+	"time"
 
 	"github.com/redis/go-redis/v9"
 )
@@ -17,4 +18,8 @@ type Redis interface {
 
 	Pipeline() redis.Pipeliner
 	Close() error
+}
+
+type RateLimiter interface {
+	Allow(ctx context.Context, key string, window time.Duration, limit int64) (bool, error)
 }
