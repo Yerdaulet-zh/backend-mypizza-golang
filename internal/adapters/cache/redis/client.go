@@ -15,7 +15,7 @@ type redisClient struct {
 func NewRedisClient(logger ports.Logger, cfg *config.RedisConfig) ports.Redis {
 	client := redis.NewClient(&redis.Options{
 		Addr:     cfg.Addr(),
-		Password: cfg.RedisPasword,
+		Password: cfg.RedisPassword,
 		DB:       cfg.DB,
 	})
 	return &redisClient{client: client}
