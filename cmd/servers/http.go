@@ -28,7 +28,7 @@ func Run(ctx context.Context, logger ports.Logger, handler http.Handler, addr st
 	}()
 
 	<-ctx.Done()
-	logger.Info("Shutting down HTTP " + serverName + " server...")
+	logger.Info(ctx, "Shutting down HTTP "+serverName+" server...")
 
 	// Give the server 5 seconds to finish processing existing requests
 	shutdownCtx, cancel := context.WithTimeout(context.Background(), gracefullShutdown)
