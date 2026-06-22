@@ -4,8 +4,6 @@ services:
     image: grafana/otel-lgtm:0.19.0
     container_name: lgtm
     ports:
-      - "4317:4317"
-      - "4318:4318"
       - "3100:3100"
       - "3000:3000"
     volumes:
@@ -17,17 +15,21 @@ services:
       - default
     restart: unless-stopped
 
-  # alloy:
-  #   image: grafana/otel-alloy:v1.11.0
-  #   container_name: alloy
-  #   ports:
-  #     - "4319:4317"
-  #     - "4320:4318"
-  #   environment:
-  #     - OTEL_RESOURCE_ATTRIBUTES=service.name=mypizza-backend
-  #   networks:
-  #     - default
-  #   restart: unless-stopped
+  alloy:
+    image: grafana/alloy:v1.17.0
+    container_name: alloy
+    ports:
+      - "12345:12345"
+      - "4317:4317"
+      - "4318:4318"
+    volumes:
+      - ./configs/alloy/config.alloy:/etc/alloy/config.alloy
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - alloy:/var/lib/alloy/data
+    networks:
+      - default
+    restart: unless-stopped
 
   redis:
     image: redis:8.6.1-alpine
@@ -163,6 +165,7 @@ volumes:
   kafka:
   postgres:
   jmx_shared:
+  alloy:
 
 networks:
   default:
