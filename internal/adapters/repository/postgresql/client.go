@@ -31,7 +31,7 @@ func NewPostgreSQLClient(cfg *config.DBConfig, logger ports.Logger) (*Client, er
 	// Pass the logger down to the opening logic
 	db, err := openPostgreSQLDB(cfg, logger)
 	if err != nil {
-		logger.Error(domain.LogLevelRepository, "Error while opening a new PostgreSQL database", "error", err)
+		logger.Error(context.TODO(), domain.LogLevelRepository, "Error while opening a new PostgreSQL database", "error", err)
 		return nil, fmt.Errorf("Error while opening a new PostgreSQL database")
 	}
 	return &Client{DB: db}, nil

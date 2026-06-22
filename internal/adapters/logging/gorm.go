@@ -30,19 +30,19 @@ func (a *gormAdapter) LogMode(level gormlogger.LogLevel) gormlogger.Interface {
 
 func (a *gormAdapter) Info(ctx context.Context, msg string, args ...interface{}) {
 	if a.config.LogLevel >= gormlogger.Info {
-		a.logger.Debug(fmt.Sprintf(msg, args...))
+		a.logger.Debug(ctx, fmt.Sprintf(msg, args...))
 	}
 }
 
 func (a *gormAdapter) Warn(ctx context.Context, msg string, args ...interface{}) {
 	if a.config.LogLevel >= gormlogger.Warn {
-		a.logger.Warn(fmt.Sprintf(msg, args...))
+		a.logger.Warn(ctx, fmt.Sprintf(msg, args...))
 	}
 }
 
 func (a *gormAdapter) Error(ctx context.Context, msg string, args ...interface{}) {
 	if a.config.LogLevel >= gormlogger.Error {
-		a.logger.Error(fmt.Sprintf(msg, args...))
+		a.logger.Error(ctx, fmt.Sprintf(msg, args...))
 	}
 }
 
@@ -56,10 +56,10 @@ func (a *gormAdapter) Trace(ctx context.Context, begin time.Time, fc func() (str
 
 	switch {
 	case err != nil && a.config.LogLevel >= gormlogger.Error:
-		a.logger.Error("GORM Query Error", "err", err, "elapsed", elapsed, "rows", rows, "sql", sql)
+		a.logger.Error(ctx, "GORM Query Error", "err", err, "elapsed", elapsed, "rows", rows, "sql", sql)
 	case elapsed > a.config.SlowThreshold && a.config.SlowThreshold != 0 && a.config.LogLevel >= gormlogger.Warn:
-		a.logger.Warn("GORM Slow Query", "elapsed", elapsed, "rows", rows, "sql", sql)
+		a.logger.Warn(ctx, "GORM Slow Query", "elapsed", elapsed, "rows", rows, "sql", sql)
 	case a.config.LogLevel >= gormlogger.Info:
-		a.logger.Info("GORM Query", "elapsed", elapsed, "rows", rows, "sql", sql)
+		a.logger.Info(ctx, "GORM Query", "elapsed", elapsed, "rows", rows, "sql", sql)
 	}
 }
