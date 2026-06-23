@@ -6,6 +6,7 @@
 .cache/
 .golangci.yml
 .yamllint
+./sonar-project.properties
 
 # Go build binaries and dependencies
 vendor/
