@@ -1,3 +1,4 @@
+// Package redis provides the implementation for caching and data storage
 package redis
 
 import (
