@@ -84,3 +84,45 @@ otelcol.exporter.otlp "tempo" {
     }
   }
 }
+
+// ============================================================================
+// MIMIR PIPELINE (PULL MODEL)
+// ============================================================================
+
+// Scrape from sources
+prometheus.scrape "app_and_infra" {
+  targets = [
+    { "__address__" = "golang-app:2112",        "app" = "golang-app" },
+    { "__address__" = "broker:9101",            "app" = "kafka" },
+    { "__address__" = "postgres-exporter:9187", "app" = "postgres" },
+    { "__address__" = "redis-exporter:9121",    "app" = "redis" },
+    { "__address__" = "connect:8083",           "app" = "debezium-connect" },
+  ]
+
+  scrape_interval = "15s"
+  forward_to      = [otelcol.receiver.prometheus.default.receiver]
+}
+
+// Convert standard scraped Prometheus streams into OpenTelemetry format
+otelcol.receiver.prometheus "default" {
+  output {
+    metrics = [otelcol.processor.batch.mimir.input]
+  }
+}
+
+// Batch the metric samples
+otelcol.processor.batch "mimir" {
+  output {
+    metrics = [otelcol.exporter.otlp.mimir.input]
+  }
+}
+
+// Ship metrics straight over OTLP gRPC to the LGTM container's internal native listener
+otelcol.exporter.otlp "mimir" {
+  client {
+    endpoint = "lgtm:4317"
+    tls {
+      insecure = true
+    }
+  }
+}
