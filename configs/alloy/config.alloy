@@ -93,10 +93,6 @@ otelcol.exporter.otlp "tempo" {
 prometheus.scrape "app_and_infra" {
   targets = [
     { "__address__" = "golang-app:2112",        "app" = "golang-app" },
-    { "__address__" = "broker:9101",            "app" = "kafka" },
-    { "__address__" = "postgres-exporter:9187", "app" = "postgres" },
-    { "__address__" = "redis-exporter:9121",    "app" = "redis" },
-    { "__address__" = "connect:8083",           "app" = "debezium-connect" },
   ]
 
   scrape_interval = "15s"
