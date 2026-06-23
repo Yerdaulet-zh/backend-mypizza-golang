@@ -1,3 +1,19 @@
+# Git and CI/CD metadata
+.git
+.gitlab-ci.yml
+
+# Local linter and tool caches
+.cache/
+.golangci.yml
+.yamllint
+
+# Go build binaries and dependencies
+vendor/
+bin/
+*.exe
+*.test
+*.out
+
 # Ignore all subdirectories and files inside configs
 configs/*/
 
