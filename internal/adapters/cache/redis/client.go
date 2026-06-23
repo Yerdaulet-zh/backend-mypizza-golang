@@ -1,4 +1,7 @@
+<<<<<<< HEAD
 // Package redis provides the implementation for caching and data storage
+=======
+>>>>>>> main
 package redis
 
 import (

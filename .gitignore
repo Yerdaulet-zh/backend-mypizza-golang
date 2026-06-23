@@ -4,6 +4,9 @@
 
 # Ignore .env file
 .env
+<<<<<<< HEAD
 
 # Ignore SonarQube generated files
 .scannerwork/*
+=======
+>>>>>>> main

@@ -11,7 +11,11 @@ database:
     ConnMaxLifetime: 1
     ConnMaxIdleTime: 30
   gormLogger:
+<<<<<<< HEAD
     SlowThreshold: 1s  # e.g. "200ms", "1s", "2m"
+=======
+    SlowThreshold: 1s # e.g. "200ms", "1s", "2m"
+>>>>>>> main
     LogLevel: "Info"
     IgnoreRecordNotFoundError: false
     Colorful: true
@@ -21,7 +25,11 @@ tracing:
 
 logging:
   level: debug
+<<<<<<< HEAD
   adapter: "multi"   # e.g. stdout, loki or multi.
+=======
+  adapter: "multi" # e.g. stdout, loki or multi.
+>>>>>>> main
   loki:
     url: "http://localhost:3100/loki/api/v1/push"
     labels:
@@ -43,7 +51,11 @@ broker:
     performance:
       batchSize: 100
       batchTimeout: 1s
+<<<<<<< HEAD
       batchBytes: 1048576  # 1MB in bytes for int64
+=======
+      batchBytes: 1048576 # 1MB in bytes for int64
+>>>>>>> main
       writeBackoffMin: 100ms
       compression: "snappy"
 
