@@ -32,11 +32,7 @@ func NewPostgreSQLClient(cfg *config.DBConfig, logger ports.Logger) (*Client, er
 	db, err := openPostgreSQLDB(cfg, logger)
 	if err != nil {
 		logger.Error(context.TODO(), domain.LogLevelRepository, "Error while opening a new PostgreSQL database", "error", err)
-<<<<<<< HEAD
 		return nil, fmt.Errorf("error while opening a new PostgreSQL database")
-=======
-		return nil, fmt.Errorf("Error while opening a new PostgreSQL database")
->>>>>>> main
 	}
 	return &Client{DB: db}, nil
 }
