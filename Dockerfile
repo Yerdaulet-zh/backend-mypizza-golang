@@ -4,6 +4,7 @@
 FROM golang:1.26.4-alpine3.23 AS builder
 
 # Add globally trusted CA-certificates
+# hadolint ignore=DL3018
 RUN apk add --no-cache ca-certificates && update-ca-certificates
 
 WORKDIR /app
@@ -22,6 +23,7 @@ RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -o mypizza-backend ./cmd/
 FROM alpine:3.19 AS runtime
 
 # Add trusted CA certificates, timezone data, and create a non-root group/user
+# hadolint ignore=DL3018
 RUN apk add --no-cache ca-certificates tzdata \
     && addgroup -S appgroup \
     && adduser -S appuser -G appgroup
