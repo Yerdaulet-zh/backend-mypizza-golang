@@ -1,0 +1,124 @@
+logging {
+  level  = "info"
+  format = "json"
+}
+
+// ============================================================================
+// LOGS PIPELINE (PULL MODEL)
+// ============================================================================
+
+// Discover all running docker containers
+discovery.docker "containers" {
+  host = "unix:///var/run/docker.sock"
+}
+
+// Relabel and extract the human-readable container name
+discovery.relabel "docker_logs" {
+  targets = discovery.docker.containers.targets
+
+  // Take the raw docker container name label
+  rule {
+    source_labels = ["__meta_docker_container_name"]
+    regex         = "/(.*)"
+    target_label  = "container"
+  }
+
+  // Also map it to 'service' so your current UI tab aggregates cleanly
+  rule {
+    source_labels = ["__meta_docker_container_name"]
+    regex         = "/(.*)"
+    target_label  = "service"
+  }
+}
+
+// Scrape logs using the newly relabeled targets
+loki.source.docker "scrape_docker" {
+  host       = "unix:///var/run/docker.sock"
+  targets    = discovery.relabel.docker_logs.output
+  forward_to = [loki.write.grafana_loki.receiver]
+}
+
+loki.write "grafana_loki" {
+  endpoint {
+    url = "http://lgtm:3100/loki/api/v1/push"
+  }
+}
+
+// ============================================================================
+// TRACES PIPELINE (PUSH MODEL)
+// ============================================================================
+
+// Open up gRPC and HTTP ports inside Alloy to accept OTLP data
+otelcol.receiver.otlp "default" {
+  grpc {
+    endpoint = "0.0.0.0:4317"
+  }
+  http {
+    endpoint = "0.0.0.0:4318"
+  }
+
+  output {
+    metrics = []
+    logs    = []
+    traces  = [otelcol.processor.batch.default.input]
+  }
+}
+
+// Heavy-lifting optimization: Batch spans together cleanly
+otelcol.processor.batch "default" {
+  send_batch_size     = 8192
+  timeout             = "10s"
+  send_batch_max_size = 10240
+
+  output {
+    traces = [otelcol.exporter.otlp.tempo.input]
+  }
+}
+
+// Export the processed traces to LGTM container (Tempo backend)
+otelcol.exporter.otlp "tempo" {
+  client {
+    endpoint = "lgtm:4317"
+    tls {
+      insecure = true
+    }
+  }
+}
+
+// ============================================================================
+// MIMIR PIPELINE (PULL MODEL)
+// ============================================================================
+
+// Scrape from sources
+prometheus.scrape "app_and_infra" {
+  targets = [
+    { "__address__" = "golang-app:2112",        "app" = "golang-app" },
+  ]
+
+  scrape_interval = "15s"
+  forward_to      = [otelcol.receiver.prometheus.default.receiver]
+}
+
+// Convert standard scraped Prometheus streams into OpenTelemetry format
+otelcol.receiver.prometheus "default" {
+  output {
+    metrics = [otelcol.processor.batch.mimir.input]
+  }
+}
+
+// Batch the metric samples
+otelcol.processor.batch "mimir" {
+  output {
+    metrics = [otelcol.exporter.otlp.mimir.input]
+  }
+}
+
+// Ship metrics straight over OTLP gRPC to the LGTM container's internal native listener
+otelcol.exporter.otlp "mimir" {
+  client {
+    endpoint = "lgtm:4317"
+    tls {
+      insecure = true
+    }
+  }
+}

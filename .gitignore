@@ -1,0 +1,6 @@
+# Development Environment Folders
+.vscode/
+.sonarlint/
+
+# Ignore .env file
+.env
