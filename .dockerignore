@@ -1,0 +1,5 @@
+# Ignore all subdirectories and files inside configs
+configs/*/
+
+# But do not ignore
+!configs/configs.yaml
