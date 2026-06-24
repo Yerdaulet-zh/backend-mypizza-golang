@@ -165,6 +165,24 @@ services:
       - default
     restart: unless-stopped
 
+  pgadmin:
+    image: dpage/pgadmin4:8.14
+    container_name: pgadmin
+    ports:
+      - "5050:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@gmail.com
+      PGADMIN_DEFAULT_PASSWORD: password
+      PGADMIN_CONFIG_ENHANCED_COOKIE_PROTECTION: "False"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - default
+    restart: unless-stopped
+
   nginx:
     image: nginx:1.28.2-alpine
     container_name: nginx-proxy
@@ -189,6 +207,7 @@ volumes:
   postgres:
   jmx_shared:
   alloy:
+  pgadmin_data:
 
 networks:
   default:
