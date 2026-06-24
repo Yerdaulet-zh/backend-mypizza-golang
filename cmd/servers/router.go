@@ -2,6 +2,7 @@
 package servers
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"time"
@@ -42,7 +43,10 @@ func MapBusinessRoutes(logger ports.Logger, tracer *trace.TracerProvider, rdb po
 
 	// notification := handlers.NewNotificationHandler(NotificationService, logger)
 	mux.HandleFunc("GET /v1/notification/email", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprint(w, "Welcome to my secure server!")
+		_, err := fmt.Fprint(w, "Welcome to my secure server!")
+		if err != nil {
+			logger.Error(context.Background(), "failed to write response", "error", err)
+		}
 	})
 
 	// // Middlewares
