@@ -31,7 +31,7 @@ func Run(ctx context.Context, logger ports.Logger, handler http.Handler, addr st
 	logger.Info(ctx, "Shutting down HTTP "+serverName+" server...")
 
 	// Give the server 5 seconds to finish processing existing requests
-	shutdownCtx, cancel := context.WithTimeout(context.Background(), gracefullShutdown)
+	shutdownCtx, cancel := context.WithTimeout(ctx, gracefullShutdown)
 	defer cancel()
 
 	return s.Shutdown(shutdownCtx)
