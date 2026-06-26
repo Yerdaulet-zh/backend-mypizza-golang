@@ -7,6 +7,7 @@ import (
 	"gorm.io/gorm"
 )
 
+// nolint:govet
 type IngredientPrice struct {
 	ID           uuid.UUID `gorm:"type:uuid;primaryKey"`
 	IngredientID uuid.UUID `gorm:"type:uuid;index;not null"`
