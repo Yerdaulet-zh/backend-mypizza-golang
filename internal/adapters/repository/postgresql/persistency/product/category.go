@@ -17,6 +17,7 @@ type Category struct {
 	DeletedAt gorm.DeletedAt `gorm:"type:timestamptz;index"`
 
 	Products []Product `gorm:"foreignKey:CategoryID;references:ID"`
+	Cities   []City    `gorm:"many2many:city_category"`
 }
 
 func (p *Category) BeforeCreate(tx *gorm.DB) error {

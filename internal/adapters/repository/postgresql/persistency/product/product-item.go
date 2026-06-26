@@ -21,7 +21,9 @@ type ProductItem struct {
 	UpdatedAt time.Time      `gorm:"type:timestamptz;default:now();not null"`
 	DeletedAt gorm.DeletedAt `gorm:"type:timestamptz;index"`
 
-	Product Product `gorm:"foreignKey:ProductID;references:ID"`
+	Product     Product      `gorm:"foreignKey:ProductID;references:ID"`
+	Ingredients []Ingredient `gorm:"many2many:product_item_ingredient"`
+	Cities      []City       `gorm:"many2many:city_product_item"`
 }
 
 func (p *ProductItem) BeforeCreate(tx *gorm.DB) error {
