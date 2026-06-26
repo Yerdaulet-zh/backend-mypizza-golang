@@ -19,13 +19,9 @@ type Product struct {
 	UpdatedAt time.Time      `gorm:"type:timestamptz;default:now();not null"`
 	DeletedAt gorm.DeletedAt `gorm:"type:timestamptz;index"`
 
-	// One-to-Many Relationship Definitions
-	Category Category `gorm:"foreignKey:CategoryID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:RESTRICT"`
-
-	ProductItem []ProductItem `gorm:"foreignKey:ProductID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
-
-	// Many-to-Many Relationship Definitions
-	Ingredients []Ingredient `gorm:"many2many:product_ingredient;foreignKey:ID;joinForeignKey:ProductID;references:ID;joinReferences:IngredientID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
+	Category     Category      `gorm:"foreignKey:CategoryID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:RESTRICT"`
+	ProductItems []ProductItem `gorm:"foreignKey:ProductID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
+	Cities       []City        `gorm:"many2many:city_product"`
 }
 
 func (p *Product) BeforeCreate(tx *gorm.DB) error {
