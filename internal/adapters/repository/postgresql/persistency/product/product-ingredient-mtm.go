@@ -1,8 +1,13 @@
 package product
 
-import "github.com/google/uuid"
+import (
+	"time"
 
-type ProductIngredient struct {
-	ProductID    uuid.UUID `gorm:"type:uuid;primaryKey"`
-	IngredientID uuid.UUID `gorm:"type:uuid;primaryKey;index"`
+	"github.com/google/uuid"
+)
+
+type ProductItemIngredient struct {
+	ProductItemID uuid.UUID `gorm:"type:uuid;primaryKey;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;foreignKey:ProductItemID;references:ID"`
+	IngredientID  uuid.UUID `gorm:"type:uuid;primaryKey;index;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;foreignKey:IngredientID;references:ID"`
+	CreatedAt     time.Time `gorm:"type:timestamptz;default:now();not null"`
 }

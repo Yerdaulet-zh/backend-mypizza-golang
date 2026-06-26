@@ -23,11 +23,18 @@ func main() {
 		},
 	}
 	stmts, err := gormschema.New("postgres", gormschema.WithConfig(config)).Load(
+		&product.City{},
 		&product.Product{},
 		&product.Category{},
 		&product.Ingredient{},
-		&product.ProductIngredient{},
 		&product.ProductItem{},
+
+		// Explicit join tables
+		&product.CityProduct{},
+		&product.CityCategory{},
+		&product.CityIngredient{},
+		&product.CityProductItem{},
+		&product.ProductItemIngredient{},
 	)
 
 	if err != nil {
