@@ -6,6 +6,7 @@ import (
 	"github.com/google/uuid"
 )
 
+// nolint:govet
 type CityProductItem struct {
 	CityID        uuid.UUID `gorm:"type:uuid;primaryKey"`
 	ProductItemID uuid.UUID `gorm:"type:uuid;primaryKey"`

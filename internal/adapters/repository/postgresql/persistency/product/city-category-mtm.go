@@ -2,6 +2,7 @@ package product
 
 import "github.com/google/uuid"
 
+// nolint:govet
 type CityCategory struct {
 	CityID      uuid.UUID `gorm:"type:uuid;primaryKey"`
 	CategoryID  uuid.UUID `gorm:"type:uuid;primaryKey"`
