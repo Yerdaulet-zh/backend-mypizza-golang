@@ -14,19 +14,20 @@ data "external_schema" "sql_types" {
   ]
 }
 
-data "composite_schema" "app" {
-  schema "public" {
-    url = data.external_schema.sql_types.url
-  }
-  schema "public" {
-    url = data.external_schema.gorm.url
-  }
-}
+// data "composite_schema" "app" {
+//   schema "public" {
+//     url = data.external_schema.sql_types.url
+//   }
+//   schema "public" {
+//     url = data.external_schema.gorm.url
+//   }
+// }
 
 env "local" {
   url = "postgres://admin:password@localhost:5432/myapp?sslmode=disable"
 
-  src = data.composite_schema.app.url
+  // src = data.composite_schema.app.url
+  src = data.external_schema.sql_types.url
 
   dev = "docker://postgres/18/dev?search_path=public"
 
