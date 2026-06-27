@@ -146,7 +146,7 @@ services:
       - default
 
   postgres:
-    image: postgres:17.3
+    image: postgres:18.4
     command: ["postgres", "-c", "wal_level=logical"]
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U admin -d myapp"]
@@ -160,7 +160,7 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - postgres:/var/lib/postgresql/data
+      - postgres:/var/lib/postgresql
     networks:
       - default
     restart: unless-stopped
