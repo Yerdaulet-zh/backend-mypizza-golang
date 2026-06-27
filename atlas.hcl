@@ -28,7 +28,7 @@ env "local" {
 
   src = data.composite_schema.app.url
 
-  dev = "docker://postgres/17/dev?search_path=public"
+  dev = "docker://postgres/18/dev?search_path=public"
 
   migration {
     dir = "file://internal/adapters/repository/postgresql/migrations"
