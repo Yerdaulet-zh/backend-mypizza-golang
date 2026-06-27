@@ -7,17 +7,7 @@ data "external_schema" "gorm" {
   ]
 }
 
-data "external_schema" "sql_types" {
-  program = [
-    "cat",
-    "./internal/adapters/repository/postgresql/schema/product.enums.sql"
-  ]
-}
-
 // data "composite_schema" "app" {
-//   schema "public" {
-//     url = data.external_schema.sql_types.url
-//   }
 //   schema "public" {
 //     url = data.external_schema.gorm.url
 //   }
@@ -26,10 +16,10 @@ data "external_schema" "sql_types" {
 env "local" {
   url = "postgres://admin:password@localhost:5432/myapp?sslmode=disable"
 
-  // src = data.composite_schema.app.url
-  src = data.external_schema.sql_types.url
+  src = data.external_schema.gorm.url
 
-  dev = "docker://postgres/18/dev?search_path=public"
+  // dev = "docker://postgres/18.4/dev?search_path=public"
+  dev = "postgres://postgres:password@localhost:5433/postgres?sslmode=disable"
 
   migration {
     dir = "file://internal/adapters/repository/postgresql/migrations"

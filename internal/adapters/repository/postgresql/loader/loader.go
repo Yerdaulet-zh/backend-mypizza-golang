@@ -18,7 +18,7 @@ import (
 	"gorm.io/gorm/schema"
 )
 
-const shemaDir = "./internal/adapters/repository/postgresql/schema/"
+const migrationsDir = "./internal/adapters/repository/postgresql/schema"
 
 func main() {
 	config := &gorm.Config{
@@ -64,7 +64,7 @@ func main() {
 }
 
 func writeSQLFiles(w io.Writer) error {
-	entries, err := os.ReadDir(shemaDir)
+	entries, err := os.ReadDir(migrationsDir)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "failed to load the schema dir %v\n", err)
 		return err
@@ -84,7 +84,7 @@ func writeSQLFiles(w io.Writer) error {
 			continue
 		}
 
-		path := filepath.Join(shemaDir, entry.Name())
+		path := filepath.Join(migrationsDir, entry.Name())
 
 		b, err := os.ReadFile(path)
 		if err != nil {
