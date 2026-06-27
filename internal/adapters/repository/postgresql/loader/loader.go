@@ -86,7 +86,10 @@ func writeSQLFiles(w io.Writer) error {
 
 		path := filepath.Join(migrationsDir, entry.Name())
 
-		b, err := os.ReadFile(path)
+		// Clean the path to strip out dangerous relative jumps like "../"
+		cleanPath := filepath.Clean(path)
+
+		b, err := os.ReadFile(cleanPath)
 		if err != nil {
 			return fmt.Errorf("read %s: %w", path, err)
 		}
