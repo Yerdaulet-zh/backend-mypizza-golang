@@ -1,4 +1,4 @@
-// Package product holds items and ingredients we sell in the MyPizza web app
+// Package product holds all product related data of MyPizza web app
 package product
 
 import (
@@ -21,7 +21,7 @@ type Product struct {
 
 	Category     Category      `gorm:"foreignKey:CategoryID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:RESTRICT"`
 	ProductItems []ProductItem `gorm:"foreignKey:ProductID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
-	Cities       []City        `gorm:"many2many:city_product"`
+	CityProducts []CityProduct `gorm:"foreignKey:ProductID"`
 }
 
 func (p *Product) BeforeCreate(tx *gorm.DB) error {

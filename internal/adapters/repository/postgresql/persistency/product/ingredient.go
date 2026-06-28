@@ -17,9 +17,8 @@ type Ingredient struct {
 	UpdatedAt time.Time      `gorm:"type:timestamptz;default:now();not null"`
 	DeletedAt gorm.DeletedAt `gorm:"type:timestamptz;index"`
 
-	IngredientPrices []IngredientPrice `gorm:"foreignKey:IngredientID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
-	ProductItems     []ProductItem     `gorm:"many2many:product_item_ingredient"`
-	Cities           []City            `gorm:"many2many:city_ingredient"`
+	ProductItemIngredients []ProductItemIngredient `gorm:"foreignKey:IngredientID"`
+	CityIngredients        []CityIngredient        `gorm:"foreignKey:IngredientID"`
 }
 
 func (p *Ingredient) BeforeCreate(tx *gorm.DB) error {
