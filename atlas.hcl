@@ -18,8 +18,7 @@ env "local" {
 
   src = data.external_schema.gorm.url
 
-  dev = "docker://postgres/18.4/dev?search_path=public"
-  // dev = "postgres://postgres:password@localhost:5433/postgres?sslmode=disable"
+  dev = "docker://postgres/18/dev?search_path=public"
 
   migration {
     dir = "file://internal/adapters/repository/postgresql/migrations"
