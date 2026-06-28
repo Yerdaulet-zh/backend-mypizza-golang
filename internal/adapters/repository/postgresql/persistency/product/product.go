@@ -1,3 +1,4 @@
+// Package product holds all product related data of MyPizza web app
 package product
 
 import (
