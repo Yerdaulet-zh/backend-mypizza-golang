@@ -37,7 +37,6 @@ func main() {
 		&product.Category{},
 		&product.Ingredient{},
 		&product.ProductItem{},
-		&product.IngredientPrice{},
 
 		// Explicit join tables
 		&product.CityProduct{},
