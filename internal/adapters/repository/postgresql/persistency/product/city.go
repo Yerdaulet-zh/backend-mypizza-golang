@@ -16,10 +16,11 @@ type City struct {
 	UpdatedAt time.Time      `gorm:"type:timestamptz;default:now();not null"`
 	DeletedAt gorm.DeletedAt `gorm:"type:timestamptz;index"`
 
-	Categories   []Category    `gorm:"many2many:city_category"`
-	Products     []Product     `gorm:"many2many:city_product"`
-	Ingredients  []Ingredient  `gorm:"many2many:city_ingredient"`
-	ProductItems []ProductItem `gorm:"many2many:city_product_item"`
+	// Has Many connections to city-specific pricing and availability parameters
+	CityCategories   []CityCategory    `gorm:"foreignKey:CityID"`
+	CityProducts     []CityProduct     `gorm:"foreignKey:CityID"`
+	CityProductItems []CityProductItem `gorm:"foreignKey:CityID"`
+	CityIngredients  []CityIngredient  `gorm:"foreignKey:CityID"`
 }
 
 func (p *City) BeforeCreate(tx *gorm.DB) error {
