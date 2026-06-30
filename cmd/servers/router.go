@@ -2,8 +2,6 @@
 package servers
 
 import (
-	"context"
-	"fmt"
 	"net/http"
 	"time"
 
@@ -38,21 +36,15 @@ func MapManagementRoutes(logger ports.Logger, client ports.Database) http.Handle
 	return mux
 }
 
-func MapBusinessRoutes(logger ports.Logger, tracer *trace.TracerProvider, rdb ports.Redis) http.Handler {
+func MapBusinessRoutes(productHandler *handlers.ProductHandler, logger ports.Logger, tracer *trace.TracerProvider, rdb ports.Redis) http.Handler {
 	mux := http.NewServeMux()
 
-	// notification := handlers.NewNotificationHandler(NotificationService, logger)
-	mux.HandleFunc("GET /v1/notification/email", func(w http.ResponseWriter, r *http.Request) {
-		_, err := fmt.Fprint(w, "Welcome to my secure server!")
-		if err != nil {
-			logger.Error(context.Background(), "failed to write response", "error", err)
-		}
-	})
+	mux.HandleFunc("GET /v1/city/category/products", productHandler.GetCityAllCategoriesProducts)
 
-	// // Middlewares
+	// Middlewares
 	rateLimiter := redis.NewRateLimiter(rdb)
 	middlewares := []mw{
-		middleware.NewIPRateLimiter(logger, rateLimiter, 100*time.Second, 1),
+		middleware.NewIPRateLimiter(logger, rateLimiter, 100*time.Second, 100),
 	}
 	handler := applyMiddlewares(mux, middlewares...)
 	return otelhttp.NewHandler(handler, "business-api")

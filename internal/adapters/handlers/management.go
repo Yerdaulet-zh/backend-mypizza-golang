@@ -5,8 +5,12 @@ package handlers
 import (
 	"net/http"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/yerdauletzhumabay/backend-mypizza-golang/internal/core/ports"
 )
+
+// Initialize the validator instance once
+var validate = validator.New()
 
 // HealthHandler defines the dependencies for health checks
 type HealthHandler struct {
