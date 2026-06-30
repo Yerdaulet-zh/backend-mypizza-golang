@@ -8,7 +8,7 @@ type GetCityAllCategoryProductsRequest struct {
 }
 
 type GetCityAllCategoryProductsResponse struct {
-	ID       uuid.UUID `json:"id"`
 	Name     string    `json:"name"`
 	ImageUrl string    `json:"image_url"`
+	ID       uuid.UUID `json:"id"`
 }

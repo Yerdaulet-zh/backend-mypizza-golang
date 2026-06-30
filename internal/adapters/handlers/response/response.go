@@ -14,9 +14,9 @@ import (
 
 // Standart Response Format
 type APIResponse struct {
-	Success      bool        `json:"success"`
 	Data         interface{} `json:"data,omitempty"`
 	ErrorMessage string      `json:"error,omitempty"`
+	Success      bool        `json:"success"`
 }
 
 func Success(ctx context.Context, logger ports.Logger, w http.ResponseWriter, statusCode int, data interface{}) {
