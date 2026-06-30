@@ -27,7 +27,7 @@ func (h *ProductHandler) GetCityAllCategoriesProducts(w http.ResponseWriter, r *
 		response.Error(w, http.StatusBadRequest, "INVALID_JSON_BODY")
 		return
 	}
-	defer r.Body.Close()
+	defer func() { _ = r.Body.Close() }()
 
 	if err := validate.Struct(req); err != nil {
 		response.Error(w, http.StatusBadRequest, "BODY_VALIDATION_FAILED")
