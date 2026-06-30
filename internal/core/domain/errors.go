@@ -3,10 +3,7 @@ package domain
 import "errors"
 
 var (
-	// Initial
-	ErrInvalidDSN       = errors.New("invalid DSN provided")
-	ErrPostgreSQLOpenDB = errors.New("error while opening a postgresql database")
-
-	// Repository
-	ErrDatabaseInternalError = errors.New("database internal error")
+	ErrBadRequest          = errors.New("the request payload is malformed or invalid")
+	ErrInternalServerError = errors.New("an unexpected error occurred on the server")
+	ErrCityNotFound        = errors.New("the specified city does not exist")
 )

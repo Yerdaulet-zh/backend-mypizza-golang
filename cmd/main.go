@@ -14,10 +14,13 @@ import (
 	"github.com/yerdauletzhumabay/backend-mypizza-golang/cmd/servers"
 	"github.com/yerdauletzhumabay/backend-mypizza-golang/internal/adapters/cache/redis"
 	"github.com/yerdauletzhumabay/backend-mypizza-golang/internal/adapters/config"
+	"github.com/yerdauletzhumabay/backend-mypizza-golang/internal/adapters/handlers"
 	"github.com/yerdauletzhumabay/backend-mypizza-golang/internal/adapters/logging"
 	postgre "github.com/yerdauletzhumabay/backend-mypizza-golang/internal/adapters/repository/postgresql"
+	"github.com/yerdauletzhumabay/backend-mypizza-golang/internal/adapters/repository/postgresql/repo"
 	"github.com/yerdauletzhumabay/backend-mypizza-golang/internal/adapters/tracing"
 	"github.com/yerdauletzhumabay/backend-mypizza-golang/internal/core/ports"
+	"github.com/yerdauletzhumabay/backend-mypizza-golang/internal/core/service"
 
 	"go.opentelemetry.io/otel/sdk/trace"
 )
@@ -56,7 +59,11 @@ func run(ctx context.Context, logger ports.Logger, tracer *trace.TracerProvider,
 	httpConfig := config.NewHttpConfig()
 	logger.Info(ctx, "Successfully loaded HTTP Server config")
 
-	mapBusinessHandler := servers.MapBusinessRoutes(logger, tracer, rdb)
+	productRepo := repo.NewProductRepository(client.GetGormDB(), logger)
+	productService := service.NewProductService(productRepo, logger)
+	productHandler := handlers.NewProductHandler(logger, productService)
+
+	mapBusinessHandler := servers.MapBusinessRoutes(productHandler, logger, tracer, rdb)
 	mapManagementRoutes := servers.MapManagementRoutes(logger, client)
 
 	go func() {

@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/yerdauletzhumabay/backend-mypizza-golang/internal/core/domain"
 	"gorm.io/gorm"
 )
 
@@ -13,7 +14,8 @@ type Product struct {
 	ID         uuid.UUID `gorm:"type:uuid;primaryKey"`
 	CategoryID uuid.UUID `gorm:"type:uuid;index;not null"`
 	Name       string    `gorm:"type:varchar(255);not null"`
-	ImageUrl   string    `gorm:"type:varchar(255);not null"`
+	// TODO: Remove ImageURL column
+	ImageUrl string `gorm:"type:varchar(255);not null"`
 
 	CreatedAt time.Time      `gorm:"type:timestamptz;default:now();not null"`
 	UpdatedAt time.Time      `gorm:"type:timestamptz;default:now();not null"`
@@ -31,4 +33,33 @@ func (p *Product) BeforeCreate(tx *gorm.DB) error {
 	}
 	p.ID = uuid
 	return nil
+}
+
+func (p *Product) ToDomain() *domain.Product {
+	if p == nil {
+		return nil
+	}
+
+	var deletedAtPtr *time.Time
+	if p.DeletedAt.Valid {
+		deletedAtPtr = &p.DeletedAt.Time
+	}
+
+	return &domain.Product{
+		ID:         p.ID,
+		CategoryID: p.CategoryID,
+		Name:       p.Name,
+		ImageUrl:   p.ImageUrl,
+		CreatedAt:  p.CreatedAt,
+		UpdatedAt:  p.UpdatedAt,
+		DeletedAt:  deletedAtPtr,
+	}
+}
+
+func ToDomainSlice(dbProducts []Product) []*domain.Product {
+	domainProducts := make([]*domain.Product, len(dbProducts))
+	for i, p := range dbProducts {
+		domainProducts[i] = (&p).ToDomain()
+	}
+	return domainProducts
 }
