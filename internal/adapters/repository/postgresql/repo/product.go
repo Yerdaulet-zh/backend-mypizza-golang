@@ -1,3 +1,5 @@
+// Package repo provides the repository layer implementations, handling all
+// direct interactions, queries, and data persistence operations with the database.
 package repo
 
 import (

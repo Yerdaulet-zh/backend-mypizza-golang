@@ -1,3 +1,5 @@
+// Package service implements the core business logic of the application,
+// coordinating domain behaviors and orchestrating data flow between ports.
 package service
 
 import (
