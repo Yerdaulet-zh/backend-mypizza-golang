@@ -61,7 +61,7 @@ func run(ctx context.Context, logger ports.Logger, tracer *trace.TracerProvider,
 
 	productRepo := repo.NewProductRepository(client.GetGormDB(), logger)
 	productService := service.NewProductService(productRepo, logger)
-	productHandler := handlers.NewProductHandler(productService)
+	productHandler := handlers.NewProductHandler(logger, productService)
 
 	mapBusinessHandler := servers.MapBusinessRoutes(productHandler, logger, tracer, rdb)
 	mapManagementRoutes := servers.MapManagementRoutes(logger, client)

@@ -4,10 +4,12 @@
 package response
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 
 	"github.com/yerdauletzhumabay/backend-mypizza-golang/internal/core/domain"
+	"github.com/yerdauletzhumabay/backend-mypizza-golang/internal/core/ports"
 )
 
 // Standart Response Format
@@ -17,34 +19,39 @@ type APIResponse struct {
 	ErrorMessage string      `json:"error,omitempty"`
 }
 
-func Success(w http.ResponseWriter, statusCode int, data interface{}) {
+func Success(ctx context.Context, logger ports.Logger, w http.ResponseWriter, statusCode int, data interface{}) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(statusCode)
-	json.NewEncoder(w).Encode(APIResponse{
+	if err := json.NewEncoder(w).Encode(APIResponse{
 		Success: true,
 		Data:    data,
-	})
+	}); err != nil {
+		logger.Debug(ctx, err.Error())
+	}
 }
 
-func Error(w http.ResponseWriter, statusCode int, message string) {
+func Error(ctx context.Context, logger ports.Logger, w http.ResponseWriter, statusCode int, message string) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(statusCode)
-	json.NewEncoder(w).Encode(APIResponse{
+	if err := json.NewEncoder(w).Encode(APIResponse{
 		Success:      false,
 		ErrorMessage: message,
-	})
+	}); err != nil {
+		logger.Debug(ctx, err.Error())
+	}
 }
 
-// MapErrorToResponse safely translates Domain errors into HTTP responses
-func MapErrorToResponse(w http.ResponseWriter, err error) {
+// MapErrorToResponse safely translates Domain errors into HTTP error responses
+func MapErrorToResponse(ctx context.Context, logger ports.Logger, w http.ResponseWriter, err error) {
 	switch err {
 	case domain.ErrBadRequest:
-		Error(w, http.StatusBadRequest, "BAD_REQUEST")
+		Error(ctx, logger, w, http.StatusBadRequest, "BAD_REQUEST")
 
 	case domain.ErrCityNotFound:
-		Error(w, http.StatusNotFound, "CITY_NOT_FOUND")
+		Error(ctx, logger, w, http.StatusNotFound, "CITY_NOT_FOUND")
 
 	default:
-		Error(w, http.StatusInternalServerError, "INTERNAL_SERVER_ERROR")
+		logger.Debug(ctx, "Error mapper could not map the domain error for http error response")
+		Error(ctx, logger, w, http.StatusInternalServerError, "INTERNAL_SERVER_ERROR")
 	}
 }

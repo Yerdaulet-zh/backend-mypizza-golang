@@ -10,11 +10,13 @@ import (
 )
 
 type ProductHandler struct {
+	logger  ports.Logger
 	service ports.ProductService
 }
 
-func NewProductHandler(service ports.ProductService) *ProductHandler {
+func NewProductHandler(logger ports.Logger, service ports.ProductService) *ProductHandler {
 	return &ProductHandler{
+		logger:  logger,
 		service: service,
 	}
 }
@@ -24,21 +26,21 @@ func (h *ProductHandler) GetCityAllCategoriesProducts(w http.ResponseWriter, r *
 
 	var req dto.GetCityAllCategoryProductsRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		response.Error(w, http.StatusBadRequest, "INVALID_JSON_BODY")
+		response.Error(ctx, h.logger, w, http.StatusBadRequest, "INVALID_JSON_BODY")
 		return
 	}
 	defer func() { _ = r.Body.Close() }()
 
 	if err := validate.Struct(req); err != nil {
-		response.Error(w, http.StatusBadRequest, "BODY_VALIDATION_FAILED")
+		response.Error(ctx, h.logger, w, http.StatusBadRequest, "BODY_VALIDATION_FAILED")
 		return
 	}
 
 	cityCategoriesProducts, err := h.service.GetCityAllCategoriesProducts(ctx, req.CityName)
 	if err != nil {
-		response.MapErrorToResponse(w, err)
+		response.MapErrorToResponse(ctx, h.logger, w, err)
 		return
 	}
 
-	response.Success(w, http.StatusOK, cityCategoriesProducts)
+	response.Success(ctx, h.logger, w, http.StatusOK, cityCategoriesProducts)
 }
