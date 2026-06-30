@@ -7,5 +7,9 @@ import (
 )
 
 type ProductService interface {
-	GetAllProducts(ctx context.Context, cityName string) (*domain.City, error)
+	GetCityAllCategoriesProducts(ctx context.Context, cityName string) (*domain.City, error)
+}
+
+type ProductRepository interface {
+	GetCityAllCategoriesProducts(ctx context.Context, cityName string) (*domain.City, error)
 }
