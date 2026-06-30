@@ -25,7 +25,7 @@ type Client struct {
 // NewPostgreSQLClient initializes the GORM client using the provided configuration and custom logger.
 func NewPostgreSQLClient(cfg *config.DBConfig, logger ports.Logger) (*Client, error) {
 	if cfg.DSN() == "" {
-		return nil, domain.ErrInvalidDSN
+		return nil, fmt.Errorf("invalid DSN")
 	}
 
 	// Pass the logger down to the opening logic
