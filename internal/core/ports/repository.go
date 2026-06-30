@@ -3,6 +3,7 @@ package ports
 import (
 	"context"
 
+	"github.com/yerdauletzhumabay/backend-mypizza-golang/internal/core/domain"
 	"gorm.io/gorm"
 )
 
@@ -13,4 +14,8 @@ type Database interface {
 	Ping(ctx context.Context) error
 	Close() error
 	GetGormDB() *gorm.DB
+}
+
+type ProductRepository interface {
+	GetAllProducts(ctx context.Context, cityName string) (*domain.City, error)
 }
