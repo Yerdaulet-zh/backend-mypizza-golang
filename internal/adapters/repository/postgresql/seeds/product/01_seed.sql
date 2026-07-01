@@ -5,7 +5,7 @@ BEGIN;
 -- ============================================================================
 CREATE TEMP TABLE temp_cities (id UUID, name VARCHAR);
 CREATE TEMP TABLE temp_categories (id UUID, name VARCHAR);
-CREATE TEMP TABLE temp_products (id UUID, name VARCHAR);
+CREATE TEMP TABLE temp_products (id UUID, category_id UUID, name VARCHAR, created_at TIMESTAMPTZ);
 CREATE TEMP TABLE temp_ingredients (id UUID, name VARCHAR);
 CREATE TEMP TABLE temp_items (id UUID, product_id UUID, size VARCHAR, type VARCHAR);
 
@@ -113,7 +113,7 @@ INSERT INTO product (id, category_id, name, created_at, updated_at)
         (uuidv7(), (SELECT id FROM temp_categories WHERE name = 'Соусы'), 'Барбекю', now(), now()),
         (uuidv7(), (SELECT id FROM temp_categories WHERE name = 'Соусы'), 'Соус Цезарь', now(), now()),
         (uuidv7(), (SELECT id FROM temp_categories WHERE name = 'Соусы'), 'Малиновое варенье', now(), now());
-INSERT INTO temp_products SELECT id, name FROM product;
+INSERT INTO temp_products SELECT id, category_id, name, created_at FROM product;
 
 -- Insert Ingredients (Extra toppings or components)
 INSERT INTO ingredient (id, name, image_url, created_at, updated_at)
@@ -398,11 +398,20 @@ SELECT c.id, cat.id, true
 FROM temp_cities c CROSS JOIN temp_categories cat
 ON CONFLICT DO NOTHING;
 
--- Activate Products in all cities automatically
-INSERT INTO city_product (city_id, product_id, is_available, updated_at)
-SELECT c.id, p.id, true, now()
-FROM temp_cities c CROSS JOIN temp_products p
-ON CONFLICT DO NOTHING;
+-- Activate Products in all cities automatically with structural sort order
+INSERT INTO city_product (city_id, product_id, is_available, display_order)
+SELECT
+    c.id,
+    p.id,
+    true,
+    -- Generates 1, 2, 3... grouped per City + Category, ordered by oldest first
+    ROW_NUMBER() OVER(
+        PARTITION BY c.id, p.category_id
+        ORDER BY p.created_at ASC
+    ) as display_order
+FROM temp_cities c
+CROSS JOIN temp_products p
+ON CONFLICT (city_id, product_id) DO NOTHING;
 
 -- Map item pricing definitions to cities explicitly
 INSERT INTO city_product_item (city_id, product_item_id, product_id, price, currency, is_available, is_displayed, updated_at)
