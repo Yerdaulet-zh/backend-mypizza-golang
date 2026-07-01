@@ -6,7 +6,7 @@ BEGIN;
 CREATE TEMP TABLE temp_cities (id UUID, name VARCHAR);
 CREATE TEMP TABLE temp_categories (id UUID, name VARCHAR, created_at TIMESTAMPTZ);
 CREATE TEMP TABLE temp_products (id UUID, category_id UUID, name VARCHAR, created_at TIMESTAMPTZ);
-CREATE TEMP TABLE temp_ingredients (id UUID, name VARCHAR);
+CREATE TEMP TABLE temp_ingredients (id UUID, name VARCHAR, created_at TIMESTAMPTZ);
 CREATE TEMP TABLE temp_items (id UUID, product_id UUID, size VARCHAR, type VARCHAR);
 
 -- ============================================================================
@@ -783,6 +783,37 @@ SELECT
     now()
 FROM temp_cities c CROSS JOIN temp_ingredients ing
 ON CONFLICT DO NOTHING;
+
+-- Link ingredients to concrete Product Items (SKUs) automatically with unique item-level display orders
+INSERT INTO product_item_ingredient (product_item_id, ingredient_id, is_available, display_order, created_at, updated_at)
+SELECT
+    i.id AS product_item_id,
+    ing.id AS ingredient_id,
+    true AS is_available,
+    -- DYNAMIC DISPLAY ORDER MAPPING
+    ROW_NUMBER() OVER(
+        PARTITION BY i.id
+        ORDER BY ing.created_at ASC
+    ) AS display_order,
+    now(),
+    now()
+FROM temp_items i
+JOIN product p ON i.product_id = p.id
+CROSS JOIN temp_ingredients ing
+WHERE
+    -- PIZZA INGREDIENTS
+    (p.category_id IN (SELECT id FROM temp_categories WHERE name = 'Пиццы' LIMIT 1)
+     AND ing.name IN (
+        'Сырный бортик', 'Моцарелла', 'Сыры чеддер и пармезан', 'Острый перец халапеньо',
+        'Цыпленок', 'Пепперони из цыпленка', 'Ветчина из цыпленка', 'Шампиньоны',
+        'Маринованные огурчики', 'Томаты', 'Острые колбаски', 'Кубики брынзы',
+        'Сладкий перец', 'Митболы из говядины', 'Чеснок', 'Красный лук', 'Итальянские травы', 'Ананасы'
+     ))
+    OR
+    -- 2. TARGETED COFFEE INGREDIENTS RULES (Explicitly named coffees only)
+    (p.name = 'Кофе Капучино'
+     AND ing.name = 'Ванильный сироп')
+ON CONFLICT (product_item_id, ingredient_id) DO NOTHING;
 
 -- Clean up transactional variables
 DROP TABLE temp_cities;
