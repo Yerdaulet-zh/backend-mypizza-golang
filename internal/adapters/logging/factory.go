@@ -6,5 +6,5 @@ import (
 )
 
 func NewLogger(cfg *config.LoggingConfig) ports.Logger {
-	return NewStdoutLogger()
+	return NewStdoutLogger(cfg)
 }
