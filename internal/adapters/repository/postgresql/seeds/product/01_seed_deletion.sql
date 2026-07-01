@@ -1,73 +1,28 @@
 -- ============================================================================
--- SURGICAL SEED DATA TRUNCATION SCRIPT
+-- BULLETPROOF SEED DATA TRUNCATION SCRIPT
 -- ============================================================================
 
 BEGIN;
 
--- 1. Wipe out junction/intersection tables first (Leaf nodes)
-DELETE FROM city_product_item;
-DELETE FROM city_ingredient;
-DELETE FROM city_product;
-DELETE FROM city_category;
+-- Wipe out junction/intersection tables first (Leaf nodes)
+TRUNCATE TABLE city_product_item CASCADE;
+TRUNCATE TABLE city_ingredient CASCADE;
+TRUNCATE TABLE city_product CASCADE;
+TRUNCATE TABLE city_category CASCADE;
 
--- 2. Wipe out concrete child SKU variations
-DELETE FROM product_item;
+-- Wipe out child SKU variations
+TRUNCATE TABLE product_item CASCADE;
 
--- 3. Delete the specific ingredients from seeded data
-DELETE FROM ingredient
-WHERE name IN (
-    'Сырный бортик',
-    'Моцарелла',
-    'Сыры чеддер и пармезан',
-    'Острый перец халапеньо',
-    'Цыпленок',
-    'Пепперони из цыпленка',
-    'Ветчина из цыпленка',
-    'Шампиньоны',
-    'Маринованные огурчики',
-    'Томаты',
-    'Острые колбаски',
-    'Кубики брынзы',
-    'Сладкий перец',
-    'Митболы из говядины',
-    'Чеснок',
-    'Красный лук',
-    'Итальянские травы',
-    'Ананасы',
-    'Ванильный сироп'
-);
+-- Delete products (Using TRUNCATE with CASCADE forces deletion of anything dependent)
+TRUNCATE TABLE product CASCADE;
 
--- 4. Delete the specific products from seeded data
-DELETE FROM product
-WHERE name IN (
-    'Ветчина и грибы', 'Пицца Том ям с цыпленком', 'Пицца том ям с креветками',
-    'Мясная', 'Мясная с цыпленком ', 'Маргарита с Песто', 'Сладкая пицца пирог',
-    'Чоризо фреш', 'Сырная', 'Охотничья', 'Чикен бомбони', 'Терияки',
-    'Креветки с песто', 'Чикен бургер', 'Чилл Грилл', 'Ветчина и сыр',
-    'Двойной цыпленок', 'Аррива!', 'Бургер-пицца', 'Покет-пицца ветчина и сыр',
-    'Покет-пицца Чилл Грилл', 'Покет-пицца чоризо барбекю', 'Паста Том ям',
-    'Паста Мясная', 'Ланчбокс Охотничий', 'Додстер Терияки', 'Додстер',
-    'Додстер с ветчиной', 'Острый Додстер', 'Молочный коктейль Соленая карамель',
-    'Молочный коктейль Фисташка', 'Молочный коктейль с печеньем Орео',
-    'Классический молочный коктейль', 'Кофе Капучино', 'Кофе Латте',
-    'Кофе Американо', 'Морс Вишня', 'Морс Клюква', 'Морс Черная Смородина',
-    'Coca-Cola', 'Coca-Cola Zero', 'Fanta', 'Sprite', 'Fusetea Персик',
-    'Fusetea Манго-Ананас', 'Fusetea Манго-Ромашка', 'Сок Piko Апельсин',
-    'Сок Piko Персик', 'Яблочный крамбл', 'Чизкейк карамельный с арахисом',
-    'Бруслетики', 'Рулетики с корицей', 'Маффин Три шоколада',
-    'Маффин Соленая карамель', 'Чизкейк Нью-Йорк',
-    'Чизкейк Банановый с шоколадным печеньем', 'Пончик Три шоколада',
-    'Пончик клубничный', 'Сырники', 'Сырники с малиновым вареньем',
-    'Тысяча островов', 'Сырный', 'Чесночный', 'Барбекю', 'Соус Цезарь',
-    'Малиновое варенье'
-);
+-- Delete categories safely now that all products are gone
+TRUNCATE TABLE category CASCADE;
 
--- 5. Delete seeded categories
-DELETE FROM category
-WHERE name IN ('Пиццы', 'Закуски', 'Коктейли', 'Кофе', 'Напитки', 'Десерты', 'Соусы');
+-- Wipe out tracking/ingredients table
+TRUNCATE TABLE ingredient CASCADE;
 
--- 6. Delete seeded cities
-DELETE FROM city
-WHERE name IN ('Shymkent', 'Almaty', 'Astana');
+-- Delete seeded cities
+DELETE FROM city WHERE name IN ('Shymkent', 'Almaty', 'Astana');
 
 COMMIT;
