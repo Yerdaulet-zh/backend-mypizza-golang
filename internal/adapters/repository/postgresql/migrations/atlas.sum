@@ -1,4 +1,4 @@
-h1:7utdP5IO6yfLD7Ajn3eLwDDuMFQErpI9HasbrzT1RY0=
+h1:N1wsuPcNnETM8YJKjc+pzSBw9XCKfJItVbU/b1tPiu0=
 20260624105504_create_product_tables.sql h1:6c5ABFq+ltLayNjU03fsrRr5fARZgDhNT+jGynTc7PQ=
 20260624134206_make_product_table_columns_name_imageUrl_non_null.sql h1:Cwb0ok5FZe+tdjrZ902qRUZLXxM+kWThpPSSS2LuBCY=
 20260624141527_add_product_items_and_enums.sql h1:s7Y9o3Ov3ND7HqcQ6sQbJWMtkz528Z1yo+7ZNsWvQkE=
@@ -10,3 +10,4 @@ h1:7utdP5IO6yfLD7Ajn3eLwDDuMFQErpI9HasbrzT1RY0=
 20260628065336_delete IngredientPrice table. No dependency on enums but only currency name is used as enum. All tables which has the m2m relationship, now uses has many relationship. Only M2M tables now hold the prices..sql h1:rmCfL9f9YhQi9EJs1vQ+TFqgZjJzFTXTOPTbh4SFU9c=
 20260701064449_KAN-16: remove column image_url form product, count from product item table. City product item table add product id and is_displayed columns, create unique partial index which only lets for a specific product in a given city.sql h1:kSj7OJNtQ7GzCPhkXYFJSvZ4ECqR5K/wSLHOaXg8z1k=
 20260701072622_add DsiplayOrder column to CityProduct table.sql h1:dCs137Y9hSdcVeguUNz03+sELel/X8t0+F53pJ7bW6I=
+20260701100249_KAN-16: add DisplayOrder column to CityCategory table.sql h1:Ru/s2xhcQWBpmMV2kA7l2QLL2wDnXw9geOdmOnXEPgI=

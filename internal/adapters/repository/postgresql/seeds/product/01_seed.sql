@@ -4,7 +4,7 @@ BEGIN;
 -- CREATE TABLES TO STORE IDs FOR CROSS JOINS
 -- ============================================================================
 CREATE TEMP TABLE temp_cities (id UUID, name VARCHAR);
-CREATE TEMP TABLE temp_categories (id UUID, name VARCHAR);
+CREATE TEMP TABLE temp_categories (id UUID, name VARCHAR, created_at TIMESTAMPTZ);
 CREATE TEMP TABLE temp_products (id UUID, category_id UUID, name VARCHAR, created_at TIMESTAMPTZ);
 CREATE TEMP TABLE temp_ingredients (id UUID, name VARCHAR);
 CREATE TEMP TABLE temp_items (id UUID, product_id UUID, size VARCHAR, type VARCHAR);
@@ -392,11 +392,16 @@ INSERT INTO temp_items SELECT id, product_id, size, type FROM product_item;
 -- INTERSECTION SEEDING: MAP PRICES AND VISIBILITY PER CITY
 -- ============================================================================
 
--- Activate Categories in all cities automatically
-INSERT INTO city_category (city_id, category_id, is_available)
-SELECT c.id, cat.id, true
+-- Activate Categories in all cities automatically with custom sort orders
+INSERT INTO city_category (city_id, category_id, is_available, display_order)
+SELECT c.id, cat.id, true,
+    -- Generates 1, 2, 3... sequentially per individual city group
+    ROW_NUMBER() OVER(
+        PARTITION BY c.id
+        ORDER BY cat.created_at -- Or ORDER BY cat.name if you want alphabetical default sorting
+    ) AS display_order
 FROM temp_cities c CROSS JOIN temp_categories cat
-ON CONFLICT DO NOTHING;
+ON CONFLICT (city_id, category_id) DO NOTHING;
 
 -- Activate Products in all cities automatically with structural sort order
 INSERT INTO city_product (city_id, product_id, is_available, display_order)
