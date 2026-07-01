@@ -1,4 +1,4 @@
-h1:gdhakfyEuE8DdzqiCftq8Kdo7ZJgoREjifRnaGuotK8=
+h1:6GVgfirz+7DWp8B5u6hp8hWQfAn9g9MZJye/5jd8ffo=
 20260624105504_create_product_tables.sql h1:6c5ABFq+ltLayNjU03fsrRr5fARZgDhNT+jGynTc7PQ=
 20260624134206_make_product_table_columns_name_imageUrl_non_null.sql h1:Cwb0ok5FZe+tdjrZ902qRUZLXxM+kWThpPSSS2LuBCY=
 20260624141527_add_product_items_and_enums.sql h1:s7Y9o3Ov3ND7HqcQ6sQbJWMtkz528Z1yo+7ZNsWvQkE=
@@ -8,3 +8,4 @@ h1:gdhakfyEuE8DdzqiCftq8Kdo7ZJgoREjifRnaGuotK8=
 20260627092504_renew_item_size_enum.sql h1:MY7n+v8BxhDlTcKn/dMF/a+nMhUbj6tUPJDRARVH9p0=
 20260627121400_adjust all current tables create table named ingredient price and add item_type enum.sql h1:UC9wcjLGnI9KdSac1NPniHV4pT7M7JybwhAeQ8DmHzg=
 20260628065336_delete IngredientPrice table. No dependency on enums but only currency name is used as enum. All tables which has the m2m relationship, now uses has many relationship. Only M2M tables now hold the prices..sql h1:rmCfL9f9YhQi9EJs1vQ+TFqgZjJzFTXTOPTbh4SFU9c=
+20260701064449_KAN-16: remove column image_url form product, count from product item table. City product item table add product id and is_displayed columns, create unique partial index which only lets for a specific product in a given city.sql h1:kSj7OJNtQ7GzCPhkXYFJSvZ4ECqR5K/wSLHOaXg8z1k=
