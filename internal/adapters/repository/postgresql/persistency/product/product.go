@@ -14,8 +14,6 @@ type Product struct {
 	ID         uuid.UUID `gorm:"type:uuid;primaryKey"`
 	CategoryID uuid.UUID `gorm:"type:uuid;index;not null"`
 	Name       string    `gorm:"type:varchar(255);not null"`
-	// TODO: Remove ImageURL column
-	ImageUrl string `gorm:"type:varchar(255);not null"`
 
 	CreatedAt time.Time      `gorm:"type:timestamptz;default:now();not null"`
 	UpdatedAt time.Time      `gorm:"type:timestamptz;default:now();not null"`
@@ -49,7 +47,6 @@ func (p *Product) ToDomain() *domain.Product {
 		ID:         p.ID,
 		CategoryID: p.CategoryID,
 		Name:       p.Name,
-		ImageUrl:   p.ImageUrl,
 		CreatedAt:  p.CreatedAt,
 		UpdatedAt:  p.UpdatedAt,
 		DeletedAt:  deletedAtPtr,
