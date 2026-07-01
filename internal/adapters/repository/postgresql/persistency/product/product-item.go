@@ -12,9 +12,8 @@ type ProductItem struct {
 	ID        uuid.UUID `gorm:"type:uuid;primaryKey"`
 	ProductID uuid.UUID `gorm:"type:uuid;index;not null"`
 
-	Size  *string `gorm:"type:varchar(50);default:null"`
-	Type  *string `gorm:"type:varchar(50);default:null"`
-	Count *string `gorm:"type:varchar(50);default:null"`
+	Size *string `gorm:"type:varchar(50);default:null"`
+	Type *string `gorm:"type:varchar(50);default:null"`
 
 	ImageUrl string `gorm:"type:varchar(255);not null"`
 
