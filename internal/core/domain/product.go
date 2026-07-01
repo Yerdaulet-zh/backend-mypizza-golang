@@ -36,7 +36,6 @@ type Product struct {
 	ID         uuid.UUID
 	CategoryID uuid.UUID
 	Name       string
-	ImageUrl   string
 
 	CreatedAt time.Time
 	UpdatedAt time.Time
