@@ -659,7 +659,7 @@ SELECT
     -- DISPLAY MAPPING (Decide exactly which singular row is true)
     CASE
         -- START OF PIZZA DISPLAY SELECTION
-        WHEN p.name = 'Ветчина и грибы' AND i.size = '30см' AND i.type = 'Традиционное' THEN true
+        WHEN p.name = 'Ветчина и грибы' AND i.size = '30см' AND i.type = 'Традиционное' THEN false
         WHEN p.name = 'Пицца Том ям с цыпленком' AND i.size = '30см' AND i.type = 'Традиционное' THEN true
         WHEN p.name = 'Пицца том ям с креветками' AND i.size = '30см' AND i.type = 'Традиционное' THEN true
         WHEN p.name = 'Мясная' AND i.size = '30см' AND i.type = 'Традиционное' THEN true
