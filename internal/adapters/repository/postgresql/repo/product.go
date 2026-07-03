@@ -209,7 +209,7 @@ func (r *ProductRepository) cityProductItemMapper(ctx context.Context, city *pro
 			ProductItemID: cityProductItem.ProductItemID,
 			ProductID:     cityProductItem.ProductID,
 			Price:         cityProductItem.Price,
-			Currency:      cityProductItem.Currency,
+			Currency:      domain.CurrencyName(cityProductItem.Currency),
 			IsAvailable:   cityProductItem.IsAvailable,
 			IsDisplayed:   cityProductItem.IsDisplayed,
 		}

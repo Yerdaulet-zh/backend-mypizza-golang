@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/yerdauletzhumabay/backend-mypizza-golang/internal/adapters/repository/postgresql/persistency/product"
 )
 
 // nolint:govet
@@ -115,7 +114,7 @@ type CityIngredient struct {
 	CityID       uuid.UUID
 	IngredientID uuid.UUID
 	Price        int64
-	Currency     product.CurrencyName
+	Currency     CurrencyName
 	IsAvailable  bool
 	UpdatedAt    time.Time
 
@@ -130,7 +129,7 @@ type CityProductItem struct {
 	ProductID     uuid.UUID
 
 	Price       int64
-	Currency    product.CurrencyName
+	Currency    CurrencyName
 	IsAvailable bool
 	IsDisplayed bool
 
