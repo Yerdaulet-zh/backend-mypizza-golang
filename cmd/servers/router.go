@@ -9,6 +9,7 @@ import (
 	"github.com/yerdauletzhumabay/backend-mypizza-golang/internal/adapters/cache/redis"
 	"github.com/yerdauletzhumabay/backend-mypizza-golang/internal/adapters/handlers"
 	"github.com/yerdauletzhumabay/backend-mypizza-golang/internal/adapters/handlers/middleware"
+	"github.com/yerdauletzhumabay/backend-mypizza-golang/internal/adapters/handlers/product"
 	"github.com/yerdauletzhumabay/backend-mypizza-golang/internal/core/ports"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"go.opentelemetry.io/otel/sdk/trace"
@@ -36,7 +37,7 @@ func MapManagementRoutes(logger ports.Logger, client ports.Database) http.Handle
 	return mux
 }
 
-func MapBusinessRoutes(productHandler *handlers.ProductHandler, logger ports.Logger, tracer *trace.TracerProvider, rdb ports.Redis) http.Handler {
+func MapBusinessRoutes(productHandler *product.ProductHandler, logger ports.Logger, tracer *trace.TracerProvider, rdb ports.Redis) http.Handler {
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("GET /v1/city/category/products", productHandler.GetCityAllCategoriesProducts)
