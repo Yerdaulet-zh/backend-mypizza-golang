@@ -3,16 +3,16 @@ package dto
 
 import "github.com/google/uuid"
 
-// START of GetCityAllCategoryProducts
-
 type GetCityAllCategoryProductsRequest struct {
 	CityName string `json:"city_name" validate:"required,min=3,max=50"`
 }
 
+// START of GetCityAllCategoryProducts
+
 // nolint:govet
 type GetCityAllCategoryProductsResponse struct {
 	Categories []CatalogCategory `json:"categories"`
-	ID         uuid.UUID         `json:"id"`
+	ID         uuid.UUID         `json:"city_id"`
 }
 
 // nolint:govet
