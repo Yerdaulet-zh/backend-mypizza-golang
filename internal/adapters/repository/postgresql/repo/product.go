@@ -6,6 +6,7 @@ import (
 	"context"
 	"fmt"
 	"sort"
+	"strconv"
 
 	"github.com/google/uuid"
 	"github.com/yerdauletzhumabay/backend-mypizza-golang/internal/adapters/repository/postgresql/persistency/product"
@@ -70,7 +71,7 @@ func (r *ProductRepository) GetCityAllCategoriesProducts(ctx context.Context, ci
 		displayOrderMap[cp.ProductID] = cp.DisplayOrder
 	}
 
-	mappedCityCategories, err := r.cityCategoryMapper(ctx, &city)
+	slicedCityCategories, err := r.cityCategoryMapper(ctx, &city)
 	if err != nil {
 		r.logger.Debug(ctx, "Error occured at cityCategoryMapper: "+err.Error())
 		return nil, err
@@ -80,6 +81,13 @@ func (r *ProductRepository) GetCityAllCategoriesProducts(ctx context.Context, ci
 	if err != nil {
 		r.logger.Debug(ctx, "Error occured at categoryMapper: "+err.Error())
 		return nil, err
+	}
+
+	for _, item := range mappedCategories {
+		for _, i := range item.CityCategories {
+			r.logger.Info(ctx, "HEEEY: "+strconv.Itoa(i.DisplayOrder))
+		}
+		break
 	}
 
 	mappedProducts, err := r.productMapper(ctx, &city)
@@ -119,9 +127,11 @@ func (r *ProductRepository) GetCityAllCategoriesProducts(ctx context.Context, ci
 		return nil, err
 	}
 
+	// Sort each Category's products by CityProduct DisplayOrder
 	r.categorySortProducts(mappedCategories, displayOrderMap)
 
-	mappedCityCategories, err = r.grouperCityCategoryWithCategory(ctx, mappedCategories, mappedCityCategories)
+	// mappedCityCategories is a slice, so it preserves the initial order of categories
+	slicedCityCategories, err = r.grouperCityCategoryWithCategory(ctx, mappedCategories, slicedCityCategories)
 	if err != nil {
 		r.logger.Debug(ctx, "Error occured at grouperCityCategoryWithCategory: "+err.Error())
 		return nil, err
@@ -129,7 +139,7 @@ func (r *ProductRepository) GetCityAllCategoriesProducts(ctx context.Context, ci
 
 	dCity := domain.City{
 		ID:             city.ID,
-		CityCategories: mappedCityCategories,
+		CityCategories: slicedCityCategories,
 	}
 	return &dCity, nil
 }
