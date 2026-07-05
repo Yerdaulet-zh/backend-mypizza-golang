@@ -71,7 +71,7 @@ func (r *ProductRepository) GetCityAllCategoriesProducts(ctx context.Context, ci
 		displayOrderMap[cp.ProductID] = cp.DisplayOrder
 	}
 
-	slicedCityCategories, err := r.cityCategoryMapper(ctx, &city)
+	slicedCityCategories, err := product.CityCategorySlicer(ctx, r.logger, &city)
 	if err != nil {
 		r.logger.Debug(ctx, "Error occured at cityCategoryMapper: "+err.Error())
 		return nil, err
@@ -157,24 +157,6 @@ func (r *ProductRepository) categorySortProducts(mappedCategories map[string]*do
 			return cat.Products[i].Name < cat.Products[j].Name // Fallback alphabetical
 		})
 	}
-}
-
-func (r *ProductRepository) cityCategoryMapper(ctx context.Context, city *product.City) ([]domain.CityCategory, error) {
-	cityCategoryList := make([]domain.CityCategory, 0, len(city.CityCategories))
-	for _, v := range city.CityCategories {
-		if v.Category.ID == uuid.Nil {
-			r.logger.Debug(ctx, "CityCategory.Category.ID is blank for city ID: "+city.ID.String())
-			return nil, fmt.Errorf("city category relation missing for city ID: %s", city.ID.String())
-		}
-		cityCat := domain.CityCategory{
-			CityID:       v.CityID,
-			CategoryID:   v.CategoryID,
-			IsAvailable:  v.IsAvailable,
-			DisplayOrder: v.DisplayOrder,
-		}
-		cityCategoryList = append(cityCategoryList, cityCat)
-	}
-	return cityCategoryList, nil
 }
 
 func (r *ProductRepository) categoryMapper(ctx context.Context, city *product.City) (map[string]*domain.Category, error) {
