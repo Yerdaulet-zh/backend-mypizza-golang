@@ -159,20 +159,6 @@ func (r *ProductRepository) categorySortProducts(mappedCategories map[string]*do
 	}
 }
 
-func (r *ProductRepository) grouperCategoryWithProduct(ctx context.Context, products map[string]*domain.Product, category map[string]*domain.Category) (map[string]*domain.Category, error) {
-	for _, prod := range products {
-		catIDStr := prod.CategoryID.String()
-		//  FIX: Lookup using the product's CategoryID string, not the product's own identifier
-		if cat, exists := category[catIDStr]; exists {
-			category[catIDStr].Products = append(cat.Products, *prod)
-		} else {
-			r.logger.Debug(ctx, "Category.ID map lookup missing for product's CategoryID: "+catIDStr)
-			return nil, fmt.Errorf("category relation missing for category ID: %s", catIDStr)
-		}
-	}
-	return category, nil
-}
-
 func (r *ProductRepository) grouperCityCategoryWithCategory(ctx context.Context, categories map[string]*domain.Category, cityCategories []domain.CityCategory) ([]domain.CityCategory, error) {
 	cityCategoryList := make([]domain.CityCategory, 0, len(cityCategories))
 	for _, v := range cityCategories {

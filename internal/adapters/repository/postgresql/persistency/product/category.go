@@ -49,3 +49,31 @@ func CategoryMapper(ctx context.Context, logger ports.Logger, city *City) (map[s
 	}
 	return categoryMap, nil
 }
+
+func GrouperCategoryWithProduct(
+	ctx context.Context,
+	logger ports.Logger,
+	products map[string]*domain.Product,
+	category map[string]*domain.Category,
+) (map[string]*domain.Category, error) {
+	for key, prod := range products {
+		catIDStr := prod.CategoryID.String()
+
+		cat, exists := category[catIDStr]
+		if !exists {
+			// High-value debugging: captures the missing Category ID, the Product ID that requested it, and the map loop key.
+			logger.Debug(ctx, fmt.Sprintf(
+				"[Grouper] Mismatch detected: CategoryID '%s' (requested by ProductID '%s', map key '%s') does not exist in master category map",
+				catIDStr, prod.ID.String(), key,
+			))
+
+			return nil, fmt.Errorf(
+				"category relation missing: ProductID '%s' references a CategoryID '%s' that does not exist",
+				prod.ID.String(), catIDStr,
+			)
+		}
+		cat.Products = append(cat.Products, *prod)
+	}
+
+	return category, nil
+}
