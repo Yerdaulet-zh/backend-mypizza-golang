@@ -109,7 +109,7 @@ func (r *ProductRepository) GetCityAllCategoriesProducts(ctx context.Context, ci
 	}
 
 	// Core Alignment: Grouping structural variants with their localized configurations
-	productItems, err = r.grouperProductItemWithCityProductItem(ctx, productItems, cityProductItems)
+	productItems, err = product.GrouperProductItemWithCityProductItem(ctx, r.logger, productItems, cityProductItems)
 	if err != nil {
 		r.logger.Debug(ctx, "Error occured at grouperProductItemWithCityProductItem: "+err.Error())
 		return nil, err
@@ -157,19 +157,6 @@ func (r *ProductRepository) categorySortProducts(mappedCategories map[string]*do
 			return cat.Products[i].Name < cat.Products[j].Name // Fallback alphabetical
 		})
 	}
-}
-
-func (r *ProductRepository) grouperProductItemWithCityProductItem(ctx context.Context, productItems map[string]*domain.ProductItem, cityProductItems map[string]*domain.CityProductItem) (map[string]*domain.ProductItem, error) {
-	for _, cityProductItem := range cityProductItems {
-		itemKey := cityProductItem.ProductItemID.String()
-		if productItem, exists := productItems[itemKey]; exists {
-			productItem.CityProductItems = append(productItem.CityProductItems, *cityProductItem)
-		} else {
-			r.logger.Debug(ctx, "CityProductItem.ProductItemID does not match any ProductItem.ID for city ID: "+cityProductItem.CityID.String())
-			return nil, fmt.Errorf("city product item relation missing for city ID: %s", cityProductItem.CityID.String())
-		}
-	}
-	return productItems, nil
 }
 
 func (r *ProductRepository) grouperProductWithProductItem(ctx context.Context, products map[string]*domain.Product, productItems map[string]*domain.ProductItem) (map[string]*domain.Product, error) {
