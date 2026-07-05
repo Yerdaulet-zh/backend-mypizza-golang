@@ -40,9 +40,14 @@ func (r *ProductRepository) GetCityAllCategoriesProducts(ctx context.Context, ci
 			return db.Select("id", "name")
 		}).
 		Preload("CityProducts", func(db *gorm.DB) *gorm.DB {
-			return db.Select("city_id", "product_id", "is_available", "display_order").
-				Where("is_available = ?", true).
-				Order("display_order ASC")
+			return db.Select("city_product.city_id", "city_product.product_id", "city_product.is_available", "city_product.display_order").
+				// Inner join with city_product_item is used because of is_displayed column in city_product_item may be false for all product items if so then product should not be included
+				Joins("INNER JOIN city_product_item ON city_product_item.product_id = city_product.product_id AND city_product_item.city_id = city_product.city_id").
+				Where("city_product.is_available = ?", true).
+				Where("city_product_item.is_available = ? AND city_product_item.is_displayed = ?", true, true).
+				// Look at all the rows that share the exact same product details, collapse them into a single row, and ignore the differences in the item sizes.
+				Group("city_product.city_id, city_product.product_id, city_product.is_available, city_product.display_order").
+				Order("city_product.display_order ASC")
 		}).
 		Preload("CityProducts.Product", func(db *gorm.DB) *gorm.DB {
 			return db.Select("id", "category_id", "name")
