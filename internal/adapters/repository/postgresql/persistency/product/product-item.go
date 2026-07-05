@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/yerdauletzhumabay/backend-mypizza-golang/internal/core/domain"
 	"gorm.io/gorm"
 )
 
@@ -33,4 +34,16 @@ func (p *ProductItem) BeforeCreate(tx *gorm.DB) error {
 	}
 	p.ID = uuid
 	return nil
+}
+
+func (p *ProductItem) ToDomain() *domain.ProductItem {
+	return &domain.ProductItem{
+		ID:                     p.ID,
+		ProductID:              p.ProductID,
+		Size:                   p.Size,
+		Type:                   p.Type,
+		ImageUrl:               p.ImageUrl,
+		ProductItemIngredients: []domain.ProductItemIngredient{},
+		CityProductItems:       []domain.CityProductItem{},
+	}
 }

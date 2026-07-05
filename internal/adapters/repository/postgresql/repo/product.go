@@ -51,7 +51,7 @@ func (r *ProductRepository) GetCityAllCategoriesProducts(ctx context.Context, ci
 				Where("is_available = ? AND is_displayed = ?", true, true)
 		}).
 		Preload("CityProductItems.ProductItem", func(db *gorm.DB) *gorm.DB {
-			return db.Select("id", "image_url")
+			return db.Select("id", "product_id", "image_url")
 		}).
 		Find(&city).Error
 	if err != nil {
@@ -184,14 +184,8 @@ func (r *ProductRepository) productItemMapper(ctx context.Context, city *product
 			r.logger.Debug(ctx, "CityProductItem.ProductItem is blank for city ID: "+city.ID.String())
 			return nil, fmt.Errorf("city product item relation missing for city ID: %s", city.ID.String())
 		}
-		prodItem := &domain.ProductItem{
-			ID:               cityProductItem.ProductItemID, // Map the actual variation variant configuration identifier
-			ProductID:        cityProductItem.ProductID,     // Keep track of the parent product context
-			Size:             cityProductItem.ProductItem.Size,
-			Type:             cityProductItem.ProductItem.Type,
-			ImageUrl:         cityProductItem.ProductItem.ImageUrl,
-			CityProductItems: []domain.CityProductItem{},
-		}
+		prodItem := cityProductItem.ProductItem.ToDomain()
+
 		productItemMap[prodItem.ID.String()] = prodItem
 	}
 	return productItemMap, nil
