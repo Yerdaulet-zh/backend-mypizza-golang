@@ -121,7 +121,7 @@ func (r *ProductRepository) GetCityAllCategoriesProducts(ctx context.Context, ci
 		return nil, err
 	}
 
-	mappedCategories, err = r.grouperCategoryWithProduct(ctx, mappedProducts, mappedCategories)
+	mappedCategories, err = product.GrouperCategoryWithProduct(ctx, r.logger, mappedProducts, mappedCategories)
 	if err != nil {
 		r.logger.Debug(ctx, "Error occured at grouperCategoryWithProduct: "+err.Error())
 		return nil, err
