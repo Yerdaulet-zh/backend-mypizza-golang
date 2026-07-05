@@ -37,3 +37,55 @@ func CityCategorySlicer(ctx context.Context, logger ports.Logger, city *City) ([
 	}
 	return cityCategoryList, nil
 }
+
+func GrouperSlicedCityCategoryWithMappedCategory(
+	ctx context.Context,
+	logger ports.Logger,
+	categories map[string]*domain.Category,
+	cityCategories []domain.CityCategory,
+) ([]domain.CityCategory, error) {
+	cityCategoryList := make([]domain.CityCategory, 0, len(cityCategories))
+
+	for i, v := range cityCategories {
+		// Case 1: Validation failure (Blank Category ID)
+		if v.CategoryID == uuid.Nil {
+			logger.Debug(ctx, fmt.Sprintf(
+				"[Grouper] Validation failed: CityCategory at index %d has a blank/nil CategoryID (CityID: '%s')",
+				i, v.CityID.String(),
+			))
+
+			return nil, fmt.Errorf(
+				"city category validation failed: missing CategoryID for CityID '%s' at slice index %d",
+				v.CityID.String(), i,
+			)
+		}
+
+		catIDStr := v.CategoryID.String()
+		cat, exists := categories[catIDStr]
+
+		// Case 2: Missing Relation failure (Not found in map)
+		if !exists {
+			logger.Debug(ctx, fmt.Sprintf(
+				"[Grouper] Mismatch detected: CategoryID '%s' (referenced by CityID '%s' at index %d) does not exist in master category map",
+				catIDStr, v.CityID.String(), i,
+			))
+
+			return nil, fmt.Errorf(
+				"city category relation missing: CityID '%s' references a CategoryID '%s' that does not exist",
+				v.CityID.String(), catIDStr,
+			)
+		}
+
+		// Happy path: Build and append the populated struct
+		cityCat := domain.CityCategory{
+			CityID:       v.CityID,
+			CategoryID:   v.CategoryID,
+			IsAvailable:  v.IsAvailable,
+			DisplayOrder: v.DisplayOrder,
+			Category:     *cat,
+		}
+		cityCategoryList = append(cityCategoryList, cityCat)
+	}
+
+	return cityCategoryList, nil
+}

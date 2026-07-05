@@ -4,7 +4,6 @@ package repo
 
 import (
 	"context"
-	"fmt"
 	"sort"
 	"strconv"
 
@@ -131,7 +130,7 @@ func (r *ProductRepository) GetCityAllCategoriesProducts(ctx context.Context, ci
 	r.categorySortProducts(mappedCategories, displayOrderMap)
 
 	// slicedCityCategories is a slice, so it preserves the initial order of categories
-	slicedCityCategories, err = r.grouperCityCategoryWithCategory(ctx, mappedCategories, slicedCityCategories)
+	slicedCityCategories, err = product.GrouperSlicedCityCategoryWithMappedCategory(ctx, r.logger, mappedCategories, slicedCityCategories)
 	if err != nil {
 		r.logger.Debug(ctx, "Error occured at grouperCityCategoryWithCategory: "+err.Error())
 		return nil, err
@@ -157,28 +156,4 @@ func (r *ProductRepository) categorySortProducts(mappedCategories map[string]*do
 			return cat.Products[i].Name < cat.Products[j].Name // Fallback alphabetical
 		})
 	}
-}
-
-func (r *ProductRepository) grouperCityCategoryWithCategory(ctx context.Context, categories map[string]*domain.Category, cityCategories []domain.CityCategory) ([]domain.CityCategory, error) {
-	cityCategoryList := make([]domain.CityCategory, 0, len(cityCategories))
-	for _, v := range cityCategories {
-		if v.CategoryID == uuid.Nil {
-			r.logger.Debug(ctx, "CityCategory.CategoryID is blank for city ID: "+v.CityID.String())
-			return nil, fmt.Errorf("city category relation missing for city ID: %s", v.CityID.String())
-		}
-		if cat, exists := categories[v.CategoryID.String()]; exists {
-			cityCat := domain.CityCategory{
-				CityID:       v.CityID,
-				CategoryID:   v.CategoryID,
-				IsAvailable:  v.IsAvailable,
-				DisplayOrder: v.DisplayOrder,
-				Category:     *cat,
-			}
-			cityCategoryList = append(cityCategoryList, cityCat)
-		} else {
-			r.logger.Debug(ctx, "CityCategory.CategoryID does not match any Category.ID for city ID: "+v.CityID.String())
-			continue
-		}
-	}
-	return cityCategoryList, nil
 }
