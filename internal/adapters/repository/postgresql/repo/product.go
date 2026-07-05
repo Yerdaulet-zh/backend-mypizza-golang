@@ -5,6 +5,7 @@ package repo
 import (
 	"context"
 	"fmt"
+	"sort"
 
 	"github.com/google/uuid"
 	"github.com/yerdauletzhumabay/backend-mypizza-golang/internal/adapters/repository/postgresql/persistency/product"
@@ -63,6 +64,12 @@ func (r *ProductRepository) GetCityAllCategoriesProducts(ctx context.Context, ci
 		return nil, domain.ErrCityNotFound
 	}
 
+	// lookup map for product DisplayOrder *before* mapping drops the ordering sequence.
+	displayOrderMap := make(map[uuid.UUID]int)
+	for _, cp := range city.CityProducts {
+		displayOrderMap[cp.ProductID] = cp.DisplayOrder
+	}
+
 	mappedCityCategories, err := r.cityCategoryMapper(ctx, &city)
 	if err != nil {
 		r.logger.Debug(ctx, "Error occured at cityCategoryMapper: "+err.Error())
@@ -93,7 +100,7 @@ func (r *ProductRepository) GetCityAllCategoriesProducts(ctx context.Context, ci
 		return nil, err
 	}
 
-	// 1. Core Alignment: Grouping structural variants with their localized configurations
+	// Core Alignment: Grouping structural variants with their localized configurations
 	productItems, err = r.grouperProductItemWithCityProductItem(ctx, productItems, cityProductItems)
 	if err != nil {
 		r.logger.Debug(ctx, "Error occured at grouperProductItemWithCityProductItem: "+err.Error())
@@ -112,16 +119,34 @@ func (r *ProductRepository) GetCityAllCategoriesProducts(ctx context.Context, ci
 		return nil, err
 	}
 
+	r.categorySortProducts(mappedCategories, displayOrderMap)
+
 	mappedCityCategories, err = r.grouperCityCategoryWithCategory(ctx, mappedCategories, mappedCityCategories)
 	if err != nil {
 		r.logger.Debug(ctx, "Error occured at grouperCityCategoryWithCategory: "+err.Error())
 		return nil, err
 	}
 
-	return &domain.City{
+	dCity := domain.City{
 		ID:             city.ID,
 		CityCategories: mappedCityCategories,
-	}, nil
+	}
+	return &dCity, nil
+}
+
+func (r *ProductRepository) categorySortProducts(mappedCategories map[string]*domain.Category, displayOrderMap map[uuid.UUID]int) {
+	// Explicitly sort Products inside each Category using displayOrderMap
+	for _, cat := range mappedCategories {
+		sort.Slice(cat.Products, func(i, j int) bool {
+			orderI := displayOrderMap[cat.Products[i].ID]
+			orderJ := displayOrderMap[cat.Products[j].ID]
+
+			if orderI != orderJ {
+				return orderI < orderJ
+			}
+			return cat.Products[i].Name < cat.Products[j].Name // Fallback alphabetical
+		})
+	}
 }
 
 func (r *ProductRepository) cityCategoryMapper(ctx context.Context, city *product.City) ([]domain.CityCategory, error) {
@@ -207,7 +232,6 @@ func (r *ProductRepository) cityProductItemMapper(ctx context.Context, city *pro
 			IsAvailable:   cityProductItem.IsAvailable,
 			IsDisplayed:   cityProductItem.IsDisplayed,
 		}
-		//  FIX: Key by ProductItemID string to stay symmetric with productItemMapper
 		cityProductItemMap[cityProdItem.ProductItemID.String()] = cityProdItem
 	}
 	return cityProductItemMap, nil
