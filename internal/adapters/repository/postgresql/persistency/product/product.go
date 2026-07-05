@@ -53,3 +53,32 @@ func ProductMapper(ctx context.Context, logger ports.Logger, city *City) (map[st
 	}
 	return productMap, nil
 }
+
+func GrouperProductWithProductItem(
+	ctx context.Context,
+	logger ports.Logger,
+	products map[string]*domain.Product,
+	productItems map[string]*domain.ProductItem,
+) (map[string]*domain.Product, error) {
+	for key, item := range productItems {
+		prodIDStr := item.ProductID.String()
+
+		prod, exists := products[prodIDStr]
+		if !exists {
+			// High-value debugging: captures the target product which failed to find, alongside the source item data.
+			logger.Debug(ctx, fmt.Sprintf(
+				"[Grouper] Mismatch detected: ProductID '%s' (referenced by ProductItemID '%s', map key '%s') does not exist in master product map",
+				prodIDStr, item.ID.String(), key,
+			))
+
+			return nil, fmt.Errorf(
+				"product item relation missing: ProductItemID '%s' references a ProductID '%s' that does not exist",
+				item.ID.String(), prodIDStr,
+			)
+		}
+
+		prod.ProductItems = append(prod.ProductItems, *item)
+	}
+
+	return products, nil
+}

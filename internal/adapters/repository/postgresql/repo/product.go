@@ -115,7 +115,7 @@ func (r *ProductRepository) GetCityAllCategoriesProducts(ctx context.Context, ci
 		return nil, err
 	}
 
-	mappedProducts, err = r.grouperProductWithProductItem(ctx, mappedProducts, productItems)
+	mappedProducts, err = product.GrouperProductWithProductItem(ctx, r.logger, mappedProducts, productItems)
 	if err != nil {
 		r.logger.Debug(ctx, "Error occured at grouperProductWithProductItem: "+err.Error())
 		return nil, err
@@ -157,19 +157,6 @@ func (r *ProductRepository) categorySortProducts(mappedCategories map[string]*do
 			return cat.Products[i].Name < cat.Products[j].Name // Fallback alphabetical
 		})
 	}
-}
-
-func (r *ProductRepository) grouperProductWithProductItem(ctx context.Context, products map[string]*domain.Product, productItems map[string]*domain.ProductItem) (map[string]*domain.Product, error) {
-	for _, item := range productItems {
-		prodIDStr := item.ProductID.String()
-		if prod, exists := products[prodIDStr]; exists {
-			prod.ProductItems = append(prod.ProductItems, *item)
-		} else {
-			r.logger.Debug(ctx, "ProductItem.ProductID does not match any Product.ID for product item ID: "+item.ID.String())
-			return nil, fmt.Errorf("product item relation missing for product item ID: %s", item.ID.String())
-		}
-	}
-	return products, nil
 }
 
 func (r *ProductRepository) grouperCategoryWithProduct(ctx context.Context, products map[string]*domain.Product, category map[string]*domain.Category) (map[string]*domain.Category, error) {
