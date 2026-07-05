@@ -1,10 +1,13 @@
 package product
 
 import (
+	"context"
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
 	"github.com/yerdauletzhumabay/backend-mypizza-golang/internal/core/domain"
+	"github.com/yerdauletzhumabay/backend-mypizza-golang/internal/core/ports"
 	"gorm.io/gorm"
 )
 
@@ -46,4 +49,18 @@ func (p *ProductItem) ToDomain() *domain.ProductItem {
 		ProductItemIngredients: []domain.ProductItemIngredient{},
 		CityProductItems:       []domain.CityProductItem{},
 	}
+}
+
+func ProductItemMapper(ctx context.Context, logger ports.Logger, city *City) (map[string]*domain.ProductItem, error) {
+	productItemMap := make(map[string]*domain.ProductItem)
+	for _, cityProductItem := range city.CityProductItems {
+		if cityProductItem.ProductItem.ID == uuid.Nil {
+			logger.Debug(ctx, "CityProductItem.ProductItem is blank for city ID: "+city.ID.String())
+			return nil, fmt.Errorf("city product item is missing a city ID value: %s", city.ID.String())
+		}
+		prodItem := cityProductItem.ProductItem.ToDomain()
+
+		productItemMap[prodItem.ID.String()] = prodItem
+	}
+	return productItemMap, nil
 }
