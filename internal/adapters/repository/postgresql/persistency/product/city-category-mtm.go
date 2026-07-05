@@ -25,7 +25,7 @@ func CityCategorySlicer(ctx context.Context, logger ports.Logger, city *City) ([
 	for _, v := range city.CityCategories {
 		if v.Category.ID == uuid.Nil {
 			logger.Debug(ctx, "CityCategory.Category.ID is blank for city ID: "+city.ID.String())
-			return nil, fmt.Errorf("city category missing city ID value: %s", city.ID.String())
+			return nil, fmt.Errorf("city category is missing a city ID value: %s", city.ID.String())
 		}
 		cityCat := domain.CityCategory{
 			CityID:       v.CityID,
