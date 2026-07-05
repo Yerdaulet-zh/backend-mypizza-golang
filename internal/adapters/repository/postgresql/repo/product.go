@@ -130,7 +130,7 @@ func (r *ProductRepository) GetCityAllCategoriesProducts(ctx context.Context, ci
 	// Sort each Category's products by CityProduct DisplayOrder
 	r.categorySortProducts(mappedCategories, displayOrderMap)
 
-	// mappedCityCategories is a slice, so it preserves the initial order of categories
+	// slicedCityCategories is a slice, so it preserves the initial order of categories
 	slicedCityCategories, err = r.grouperCityCategoryWithCategory(ctx, mappedCategories, slicedCityCategories)
 	if err != nil {
 		r.logger.Debug(ctx, "Error occured at grouperCityCategoryWithCategory: "+err.Error())
