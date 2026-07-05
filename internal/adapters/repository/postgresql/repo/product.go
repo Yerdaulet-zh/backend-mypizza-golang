@@ -90,7 +90,7 @@ func (r *ProductRepository) GetCityAllCategoriesProducts(ctx context.Context, ci
 		break
 	}
 
-	mappedProducts, err := r.productMapper(ctx, &city)
+	mappedProducts, err := product.ProductMapper(ctx, r.logger, &city)
 	if err != nil {
 		r.logger.Debug(ctx, "Error occured at productMapper: "+err.Error())
 		return nil, err
@@ -157,24 +157,6 @@ func (r *ProductRepository) categorySortProducts(mappedCategories map[string]*do
 			return cat.Products[i].Name < cat.Products[j].Name // Fallback alphabetical
 		})
 	}
-}
-
-func (r *ProductRepository) productMapper(ctx context.Context, city *product.City) (map[string]*domain.Product, error) {
-	productMap := make(map[string]*domain.Product)
-	for _, cityProduct := range city.CityProducts {
-		if cityProduct.Product.ID == uuid.Nil {
-			r.logger.Debug(ctx, "CityProduct.Product is blank for city ID: "+city.ID.String())
-			return nil, fmt.Errorf("city product relation missing for city ID: %s", city.ID.String())
-		}
-		prod := &domain.Product{
-			ID:           cityProduct.ProductID,
-			CategoryID:   cityProduct.Product.CategoryID,
-			Name:         cityProduct.Product.Name,
-			ProductItems: []domain.ProductItem{},
-		}
-		productMap[prod.ID.String()] = prod
-	}
-	return productMap, nil
 }
 
 func (r *ProductRepository) productItemMapper(ctx context.Context, city *product.City) (map[string]*domain.ProductItem, error) {
