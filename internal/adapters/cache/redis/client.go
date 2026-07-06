@@ -13,13 +13,13 @@ type redisClient struct {
 	client *redis.Client
 }
 
-func NewRedisClient(logger ports.Logger, cfg *config.RedisConfig) ports.Redis {
+func NewRedisClient(logger ports.Logger, cfg *config.RedisConfig) *redis.Client {
 	client := redis.NewClient(&redis.Options{
 		Addr:     cfg.Addr(),
 		Password: cfg.RedisPassword,
 		DB:       cfg.DB,
 	})
-	return &redisClient{client: client}
+	return client
 }
 
 func (r *redisClient) Pipeline() redis.Pipeliner {
