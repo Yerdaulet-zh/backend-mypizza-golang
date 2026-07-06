@@ -12,11 +12,10 @@ import (
 	"github.com/spf13/viper"
 )
 
-func InitConfig() error {
+func InitConfig(configPath string) error {
 	viper.SetConfigName("configs")
 	viper.SetConfigType("yaml")
-	viper.AddConfigPath(".")
-	viper.AddConfigPath("./configs")
+	viper.AddConfigPath(configPath)
 
 	if err := viper.ReadInConfig(); err != nil {
 		var fileLookupError viper.ConfigFileNotFoundError

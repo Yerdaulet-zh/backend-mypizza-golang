@@ -10,7 +10,7 @@ import (
 )
 
 // Initialize the validator instance once
-var validate = validator.New()
+var Validate = validator.New()
 
 // HealthHandler defines the dependencies for health checks
 type HealthHandler struct {

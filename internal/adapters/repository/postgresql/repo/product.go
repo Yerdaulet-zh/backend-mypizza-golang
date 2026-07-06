@@ -4,7 +4,8 @@ package repo
 
 import (
 	"context"
-	"time"
+	"sort"
+	"strconv"
 
 	"github.com/google/uuid"
 	"github.com/yerdauletzhumabay/backend-mypizza-golang/internal/adapters/repository/postgresql/persistency/product"
@@ -27,158 +28,137 @@ func NewProductRepository(db *gorm.DB, logger ports.Logger) ports.ProductReposit
 
 func (r *ProductRepository) GetCityAllCategoriesProducts(ctx context.Context, cityName string) (*domain.City, error) {
 	var city product.City
-
 	err := r.db.WithContext(ctx).
 		Select("id", "name").
 		Where("name = ?", cityName).
-
-		// Preload only available CityCategories and their associated Categories
 		Preload("CityCategories", func(db *gorm.DB) *gorm.DB {
-			return db.Where("is_available = ?", true)
+			return db.Select("city_id", "category_id", "is_available", "display_order").
+				Where("is_available = ?", true).
+				Order("display_order ASC")
 		}).
-		Preload("CityCategories.Category", nil).
-
-		// Preload only available CityProducts and their associated Products
+		Preload("CityCategories.Category", func(db *gorm.DB) *gorm.DB {
+			return db.Select("id", "name")
+		}).
 		Preload("CityProducts", func(db *gorm.DB) *gorm.DB {
-			return db.Where("is_available = ?", true)
+			return db.Select("city_product.city_id", "city_product.product_id", "city_product.is_available", "city_product.display_order").
+				// Inner join with city_product_item is used because of is_displayed column in city_product_item may be false for all product items if so then product should not be included
+				Joins("INNER JOIN city_product_item ON city_product_item.product_id = city_product.product_id AND city_product_item.city_id = city_product.city_id").
+				Where("city_product.is_available = ?", true).
+				Where("city_product_item.is_available = ? AND city_product_item.is_displayed = ?", true, true).
+				// Look at all the rows that share the exact same product details, collapse them into a single row, and ignore the differences in the item sizes.
+				Group("city_product.city_id, city_product.product_id, city_product.is_available, city_product.display_order").
+				Order("city_product.display_order ASC")
 		}).
-		Preload("CityProducts.Product").
-
-		// Preload ProductItems filtered by City availability and specific fields
-		Preload("CityProducts.Product.ProductItems", func(db *gorm.DB) *gorm.DB {
-			// Join with CityProductItems to filter by the current city's availability
-			return db.Table("product_item").
-				Select(
-					"product_item.id",
-					"product_item.product_id",
-					"product_item.image_url",
-					"product_item.size",
-					"product_item.type",
-					"product_item.count",
-					"product_item.created_at",
-					"product_item.updated_at",
-					"product_item.deleted_at",
-				).
-				Joins("JOIN city_product_item ON city_product_item.product_item_id = product_item.id").
-				Where("city_product_item.is_available = ? AND city_product_item.city_id = (SELECT id FROM city WHERE name = ? LIMIT 1)", true, cityName)
+		Preload("CityProducts.Product", func(db *gorm.DB) *gorm.DB {
+			return db.Select("id", "category_id", "name")
 		}).
-
-		// Preload the localized pricing from the CityProductItem pivot
 		Preload("CityProductItems", func(db *gorm.DB) *gorm.DB {
-			return db.Select("city_id", "product_item_id", "price", "currency").Where("is_available = ?", true)
+			return db.Select("city_id", "product_item_id", "product_id", "price", "currency", "is_available", "is_displayed").
+				Where("is_available = ? AND is_displayed = ?", true, true)
+		}).
+		Preload("CityProductItems.ProductItem", func(db *gorm.DB) *gorm.DB {
+			return db.Select("id", "product_id", "image_url")
 		}).
 		Find(&city).Error
-
 	if err != nil {
+		r.logger.Debug(ctx, "Error occured at GetCityAllCategoriesProducts: "+err.Error())
 		return nil, err
 	}
 
-	return helperGetCityAllCategoriesProducts(&city)
+	if city.ID == uuid.Nil {
+		return nil, domain.ErrCityNotFound
+	}
+
+	// lookup map for product DisplayOrder *before* mapping drops the ordering sequence.
+	displayOrderMap := make(map[uuid.UUID]int)
+	for _, cp := range city.CityProducts {
+		displayOrderMap[cp.ProductID] = cp.DisplayOrder
+	}
+
+	slicedCityCategories, err := product.CityCategorySlicer(ctx, r.logger, &city)
+	if err != nil {
+		r.logger.Debug(ctx, "Error occured at cityCategoryMapper: "+err.Error())
+		return nil, err
+	}
+
+	mappedCategories, err := product.CategoryMapper(ctx, r.logger, &city)
+	if err != nil {
+		r.logger.Debug(ctx, "Error occured at categoryMapper: "+err.Error())
+		return nil, err
+	}
+
+	for _, item := range mappedCategories {
+		for _, i := range item.CityCategories {
+			r.logger.Info(ctx, "HEEEY: "+strconv.Itoa(i.DisplayOrder))
+		}
+		break
+	}
+
+	mappedProducts, err := product.ProductMapper(ctx, r.logger, &city)
+	if err != nil {
+		r.logger.Debug(ctx, "Error occured at productMapper: "+err.Error())
+		return nil, err
+	}
+
+	productItems, err := product.ProductItemMapper(ctx, r.logger, &city)
+	if err != nil {
+		r.logger.Debug(ctx, "Error occured at productItemMapper: "+err.Error())
+		return nil, err
+	}
+
+	cityProductItems, err := product.CityProductItemMapper(ctx, r.logger, &city)
+	if err != nil {
+		r.logger.Debug(ctx, "Error occured at cityProductItemMapper: "+err.Error())
+		return nil, err
+	}
+
+	// Core Alignment: Grouping structural variants with their localized configurations
+	productItems, err = product.GrouperProductItemWithCityProductItem(ctx, r.logger, productItems, cityProductItems)
+	if err != nil {
+		r.logger.Debug(ctx, "Error occured at grouperProductItemWithCityProductItem: "+err.Error())
+		return nil, err
+	}
+
+	mappedProducts, err = product.GrouperProductWithProductItem(ctx, r.logger, mappedProducts, productItems)
+	if err != nil {
+		r.logger.Debug(ctx, "Error occured at grouperProductWithProductItem: "+err.Error())
+		return nil, err
+	}
+
+	mappedCategories, err = product.GrouperCategoryWithProduct(ctx, r.logger, mappedProducts, mappedCategories)
+	if err != nil {
+		r.logger.Debug(ctx, "Error occured at grouperCategoryWithProduct: "+err.Error())
+		return nil, err
+	}
+
+	// Sort each Category's products by CityProduct DisplayOrder
+	r.categorySortProducts(mappedCategories, displayOrderMap)
+
+	// slicedCityCategories is a slice, so it preserves the initial order of categories
+	slicedCityCategories, err = product.GrouperSlicedCityCategoryWithMappedCategory(ctx, r.logger, mappedCategories, slicedCityCategories)
+	if err != nil {
+		r.logger.Debug(ctx, "Error occured at grouperCityCategoryWithCategory: "+err.Error())
+		return nil, err
+	}
+
+	dCity := domain.City{
+		ID:             city.ID,
+		CityCategories: slicedCityCategories,
+	}
+	return &dCity, nil
 }
 
-func helperGetCityAllCategoriesProducts(city *product.City) (*domain.City, error) {
-	// Create a map of product items by their ID for quick pricing/availability lookups
-	cityItemMap := make(map[uuid.UUID]product.CityProductItem)
-	for _, cpi := range city.CityProductItems {
-		cityItemMap[cpi.ProductItemID] = cpi
-	}
+func (r *ProductRepository) categorySortProducts(mappedCategories map[string]*domain.Category, displayOrderMap map[uuid.UUID]int) {
+	// Explicitly sort Products inside each Category using displayOrderMap
+	for _, cat := range mappedCategories {
+		sort.Slice(cat.Products, func(i, j int) bool {
+			orderI := displayOrderMap[cat.Products[i].ID]
+			orderJ := displayOrderMap[cat.Products[j].ID]
 
-	// Process and map Products grouped by Category ID
-	// We group them first because GORM fetches products flatly via CityProducts pivot
-	categoryProducts := make(map[uuid.UUID][]domain.Product)
-
-	for _, cp := range city.CityProducts {
-		dbProd := cp.Product
-
-		// Map nested ProductItems for this product
-		var domainItems []domain.ProductItem
-		for _, pi := range dbProd.ProductItems {
-			// Check if this item actually has city-specific configuration populated
-			cityConfig, isConfigured := cityItemMap[pi.ID]
-			if !isConfigured {
-				continue // Skip if not explicitly available in this city
+			if orderI != orderJ {
+				return orderI < orderJ
 			}
-
-			var deletedAtPtr *time.Time
-			if pi.DeletedAt.Valid {
-				deletedAtPtr = &pi.DeletedAt.Time
-			}
-
-			domainItems = append(domainItems, domain.ProductItem{
-				ID:        pi.ID,
-				ProductID: pi.ProductID,
-				Size:      pi.Size,
-				Type:      pi.Type,
-				Count:     pi.Count,
-				ImageUrl:  pi.ImageUrl,
-				Price:     cityConfig.Price,
-				Currency:  string(cityConfig.Currency),
-				CreatedAt: pi.CreatedAt,
-				UpdatedAt: pi.UpdatedAt,
-				DeletedAt: deletedAtPtr,
-			})
-		}
-
-		// Only add the product if it has items available in this city
-		if len(domainItems) > 0 {
-			var deletedAtPtr *time.Time
-			if dbProd.DeletedAt.Valid {
-				deletedAtPtr = &dbProd.DeletedAt.Time
-			}
-
-			prod := domain.Product{
-				ID:           dbProd.ID,
-				CategoryID:   dbProd.CategoryID,
-				Name:         dbProd.Name,
-				ImageUrl:     dbProd.ImageUrl,
-				CreatedAt:    dbProd.CreatedAt,
-				UpdatedAt:    dbProd.UpdatedAt,
-				DeletedAt:    deletedAtPtr,
-				ProductItems: domainItems,
-			}
-			categoryProducts[dbProd.CategoryID] = append(categoryProducts[dbProd.CategoryID], prod)
-		}
-	}
-
-	// Map Categories and attach their corresponding Products
-	var domainCategories []domain.Category
-	for _, cc := range city.CityCategories {
-		dbCat := cc.Category
-
-		// Fetch products belonging to this specific category context
-		prods, hasProducts := categoryProducts[dbCat.ID]
-		if !hasProducts {
-			continue // Skip empty categories if you don't want them in the response
-		}
-
-		var deletedAtPtr *time.Time
-		if dbCat.DeletedAt.Valid {
-			deletedAtPtr = &dbCat.DeletedAt.Time
-		}
-
-		domainCategories = append(domainCategories, domain.Category{
-			ID:        dbCat.ID,
-			Name:      dbCat.Name,
-			CreatedAt: dbCat.CreatedAt,
-			UpdatedAt: dbCat.UpdatedAt,
-			DeletedAt: deletedAtPtr,
-			Products:  prods,
+			return cat.Products[i].Name < cat.Products[j].Name // Fallback alphabetical
 		})
 	}
-
-	// Construct final root Domain City structure
-	var cityDeletedAtPtr *time.Time
-	if city.DeletedAt.Valid {
-		cityDeletedAtPtr = &city.DeletedAt.Time
-	}
-
-	domainCity := domain.City{
-		ID:        city.ID,
-		Name:      city.Name,
-		CreatedAt: city.CreatedAt,
-		UpdatedAt: city.UpdatedAt,
-		DeletedAt: cityDeletedAtPtr,
-		Category:  domainCategories,
-	}
-	return &domainCity, nil
 }

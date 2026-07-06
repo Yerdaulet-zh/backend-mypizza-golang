@@ -224,12 +224,12 @@ INSERT INTO product_item (id, product_id, size, type, image_url, created_at, upd
         (uuidv7(), (SELECT id FROM temp_products WHERE name = 'Сырная'), '35см', 'Тонкое', 'https://media.dodostatic.net/image/r:520x520/01995c3adbcb79169317f4cbb8ca908f.png', now(), now()),
 
         -- Чикен бомбони
-        (uuidv7(), (SELECT id FROM temp_products WHERE name = 'Сырная'), '25см', 'Традиционное', 'https://media.dodostatic.net/image/r:520x520/019b2193bab7701890ae8d253facb9f8.png', now(), now()),
-        (uuidv7(), (SELECT id FROM temp_products WHERE name = 'Сырная'), '30см', 'Традиционное', 'https://media.dodostatic.net/image/r:520x520/019b2193c0b4786d8b688fddde3fa8de.png', now(), now()),
-        (uuidv7(), (SELECT id FROM temp_products WHERE name = 'Сырная'), '35см', 'Традиционное', 'https://media.dodostatic.net/image/r:520x520/019b2193cfe073d58444e4cc86ccd998.png', now(), now()),
+        (uuidv7(), (SELECT id FROM temp_products WHERE name = 'Чикен бомбони'), '25см', 'Традиционное', 'https://media.dodostatic.net/image/r:520x520/019b2193bab7701890ae8d253facb9f8.png', now(), now()),
+        (uuidv7(), (SELECT id FROM temp_products WHERE name = 'Чикен бомбони'), '30см', 'Традиционное', 'https://media.dodostatic.net/image/r:520x520/019b2193c0b4786d8b688fddde3fa8de.png', now(), now()),
+        (uuidv7(), (SELECT id FROM temp_products WHERE name = 'Чикен бомбони'), '35см', 'Традиционное', 'https://media.dodostatic.net/image/r:520x520/019b2193cfe073d58444e4cc86ccd998.png', now(), now()),
 
-        (uuidv7(), (SELECT id FROM temp_products WHERE name = 'Сырная'), '30см', 'Тонкое', 'https://media.dodostatic.net/image/r:520x520/019b2193c70f757c867b6b1bb400718e.png', now(), now()),
-        (uuidv7(), (SELECT id FROM temp_products WHERE name = 'Сырная'), '35см', 'Тонкое', 'https://media.dodostatic.net/image/r:520x520/019b2193d55f7239a38e0fed1cf34905.png', now(), now()),
+        (uuidv7(), (SELECT id FROM temp_products WHERE name = 'Чикен бомбони'), '30см', 'Тонкое', 'https://media.dodostatic.net/image/r:520x520/019b2193c70f757c867b6b1bb400718e.png', now(), now()),
+        (uuidv7(), (SELECT id FROM temp_products WHERE name = 'Чикен бомбони'), '35см', 'Тонкое', 'https://media.dodostatic.net/image/r:520x520/019b2193d55f7239a38e0fed1cf34905.png', now(), now()),
 
         -- Охотничья
         (uuidv7(), (SELECT id FROM temp_products WHERE name = 'Охотничья'), '20см', 'Традиционное', 'https://media.dodostatic.net/image/r:520x520/019c662f3e0b7141bc8706396110f74a.png', now(), now()),
@@ -659,7 +659,7 @@ SELECT
     -- DISPLAY MAPPING (Decide exactly which singular row is true)
     CASE
         -- START OF PIZZA DISPLAY SELECTION
-        WHEN p.name = 'Ветчина и грибы' AND i.size = '30см' AND i.type = 'Традиционное' THEN true
+        WHEN p.name = 'Ветчина и грибы' AND i.size = '30см' AND i.type = 'Традиционное' THEN false
         WHEN p.name = 'Пицца Том ям с цыпленком' AND i.size = '30см' AND i.type = 'Традиционное' THEN true
         WHEN p.name = 'Пицца том ям с креветками' AND i.size = '30см' AND i.type = 'Традиционное' THEN true
         WHEN p.name = 'Мясная' AND i.size = '30см' AND i.type = 'Традиционное' THEN true

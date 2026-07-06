@@ -5,7 +5,9 @@ import (
 	"context"
 	"log/slog"
 	"os"
+	"strings"
 
+	"github.com/yerdauletzhumabay/backend-mypizza-golang/internal/adapters/config"
 	"github.com/yerdauletzhumabay/backend-mypizza-golang/internal/core/ports"
 	"go.opentelemetry.io/otel/trace"
 )
@@ -18,10 +20,29 @@ type stdoutAdapter struct {
 
 // NewStdoutLogger initializes and returns a new Logger that outputs to stdout.
 // It uses slog's JSONHandler for structured logging.
-func NewStdoutLogger() ports.Logger {
-	handler := slog.NewJSONHandler(os.Stdout, nil)
+func NewStdoutLogger(cfg *config.LoggingConfig) ports.Logger {
+	opts := &slog.HandlerOptions{
+		Level: mapLogLevel(cfg.Level()),
+	}
+	handler := slog.NewJSONHandler(os.Stdout, opts)
 	return &stdoutAdapter{
 		logger: slog.New(handler),
+	}
+}
+
+// Mpas string log levels from configuration to slog.Level.
+func mapLogLevel(level string) slog.Level {
+	switch strings.ToLower(level) {
+	case "debug":
+		return slog.LevelDebug
+	case "info":
+		return slog.LevelInfo
+	case "warn":
+		return slog.LevelWarn
+	case "error":
+		return slog.LevelError
+	default:
+		return slog.LevelInfo
 	}
 }
 
