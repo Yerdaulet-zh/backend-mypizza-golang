@@ -35,7 +35,7 @@ func NewCachedProductRepository(
 }
 
 func (r *cachedProductRepository) GetCityAllCategoriesProducts(ctx context.Context, cityName string) (*domain.City, error) {
-	ctx, span := otel.Tracer("repo").Start(ctx, "GetCityAllCategoriesProducts")
+	ctx, span := otel.Tracer("repo").Start(ctx, "repo.cache.GetCityAllCategoriesProducts")
 	defer span.End()
 
 	// Define the cache key
@@ -79,7 +79,7 @@ func (r *cachedProductRepository) GetCityAllCategoriesProducts(ctx context.Conte
 }
 
 func (r *cachedProductRepository) getFromCache(ctx context.Context, key string) (*domain.City, error) {
-	ctx, span := otel.Tracer("repo").Start(ctx, "GetCityAllCategoriesProducts.getFromCache")
+	ctx, span := otel.Tracer("repo").Start(ctx, "repo.GetCityAllCategoriesProducts.getFromCache")
 	defer span.End()
 
 	val, err := r.redisClient.Get(ctx, key).Result()
