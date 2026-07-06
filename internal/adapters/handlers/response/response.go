@@ -51,7 +51,7 @@ func MapErrorToResponse(ctx context.Context, logger ports.Logger, w http.Respons
 		Error(ctx, logger, w, http.StatusNotFound, "CITY_NOT_FOUND")
 
 	default:
-		logger.Debug(ctx, "Error mapper could not map the domain error for http error response")
+		logger.Debug(ctx, "HTTP Error mapper could not map the domain error for http error response", "error", err.Error())
 		Error(ctx, logger, w, http.StatusInternalServerError, "INTERNAL_SERVER_ERROR")
 	}
 }

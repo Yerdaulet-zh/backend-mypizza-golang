@@ -13,8 +13,8 @@ type LokiConfig struct {
 	url    string
 }
 
-func NewLoggingConfig() (*LoggingConfig, error) {
-	if err := InitConfig(); err != nil {
+func NewLoggingConfig(configPath string) (*LoggingConfig, error) {
+	if err := InitConfig(configPath); err != nil {
 		return nil, err
 	}
 
