@@ -82,7 +82,8 @@ func run(ctx context.Context, logger ports.Logger, tracer *trace.TracerProvider,
 
 func loadComponents(ctx context.Context) (ports.Logger, *trace.TracerProvider, *postgre.Client, ports.Redis) {
 	// Configuration
-	cfg, err := config.NewLoggingConfig()
+	configPath := "./configs"
+	cfg, err := config.NewLoggingConfig(configPath)
 	if err != nil {
 		log.Fatalf("Error initializing config: %v", err)
 	}
