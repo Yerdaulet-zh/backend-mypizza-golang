@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"log"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -12,7 +11,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
-	"github.com/yerdauletzhumabay/backend-mypizza-golang/internal/adapters/config"
 	"github.com/yerdauletzhumabay/backend-mypizza-golang/internal/adapters/handlers/dto"
 	"github.com/yerdauletzhumabay/backend-mypizza-golang/internal/adapters/logging"
 	"github.com/yerdauletzhumabay/backend-mypizza-golang/internal/core/domain"
@@ -22,14 +20,6 @@ import (
 type MockProductService struct {
 	mock.Mock
 	logger ports.Logger
-}
-
-func loadLogger(configPath string) ports.Logger {
-	cfg, err := config.NewLoggingConfig(configPath)
-	if err != nil {
-		log.Fatalf("Error initializing config: %v", err)
-	}
-	return logging.NewLogger(cfg)
 }
 
 func (m *MockProductService) GetCityAllCategoriesProducts(ctx context.Context, cityName string) (*domain.City, error) {
@@ -74,7 +64,7 @@ func TestGetCityAllCategoriesProducts(t *testing.T) {
 		},
 	}
 	// Mock logger
-	logger := loadLogger("../../../../configs")
+	logger := logging.NewDefaultLogger("../../../../configs")
 
 	tests := []struct {
 		name           string

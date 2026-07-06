@@ -2,7 +2,6 @@ package repo
 
 import (
 	"context"
-	"log"
 	"testing"
 
 	"github.com/google/uuid"
@@ -13,25 +12,15 @@ import (
 	"gorm.io/gorm"
 	"gorm.io/gorm/schema"
 
-	"github.com/yerdauletzhumabay/backend-mypizza-golang/internal/adapters/config"
 	"github.com/yerdauletzhumabay/backend-mypizza-golang/internal/adapters/logging"
 	"github.com/yerdauletzhumabay/backend-mypizza-golang/internal/adapters/repository/postgresql/persistency/product"
 	"github.com/yerdauletzhumabay/backend-mypizza-golang/internal/core/domain"
-	"github.com/yerdauletzhumabay/backend-mypizza-golang/internal/core/ports"
 )
 
 type ProductRepoIntegrationTestSuite struct {
 	suite.Suite
 	db   *gorm.DB
 	repo *ProductRepository
-}
-
-func loadLogger(configPath string) ports.Logger {
-	cfg, err := config.NewLoggingConfig(configPath)
-	if err != nil {
-		log.Fatalf("Error initializing config: %v", err)
-	}
-	return logging.NewLogger(cfg)
 }
 
 // Runs once at the very beginning
@@ -75,7 +64,7 @@ func (s *ProductRepoIntegrationTestSuite) SetupSuite() {
 
 	s.repo = &ProductRepository{
 		db:     s.db,
-		logger: loadLogger("../../../../../configs"),
+		logger: logging.NewDefaultLogger("../../../../../configs"),
 	}
 }
 
