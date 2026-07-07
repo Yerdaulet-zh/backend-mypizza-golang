@@ -11,6 +11,7 @@ import (
 	"syscall"
 	"time"
 
+	redisV9 "github.com/redis/go-redis/v9"
 	"github.com/yerdauletzhumabay/backend-mypizza-golang/cmd/servers"
 	"github.com/yerdauletzhumabay/backend-mypizza-golang/internal/adapters/cache/redis"
 	"github.com/yerdauletzhumabay/backend-mypizza-golang/internal/adapters/config"
@@ -21,6 +22,7 @@ import (
 	"github.com/yerdauletzhumabay/backend-mypizza-golang/internal/adapters/tracing"
 	"github.com/yerdauletzhumabay/backend-mypizza-golang/internal/core/ports"
 	"github.com/yerdauletzhumabay/backend-mypizza-golang/internal/core/service"
+	"golang.org/x/sync/singleflight"
 
 	"go.opentelemetry.io/otel/sdk/trace"
 )
@@ -29,15 +31,15 @@ func main() {
 	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer cancel()
 
-	logger, tracer, client, rdb := loadComponents(ctx)
+	logger, tracer, client, rdb, sfGroup := loadComponents(ctx)
 
-	if err := run(ctx, logger, tracer, client, rdb); err != nil {
+	if err := run(ctx, logger, tracer, client, rdb, sfGroup); err != nil {
 		fmt.Fprintf(os.Stderr, "error: %v\n", err)
 		os.Exit(1)
 	}
 }
 
-func run(ctx context.Context, logger ports.Logger, tracer *trace.TracerProvider, client ports.Database, rdb ports.Redis) error {
+func run(ctx context.Context, logger ports.Logger, tracer *trace.TracerProvider, client ports.Database, rdb *redisV9.Client, sfGroup *singleflight.Group) error {
 	defer func() {
 		logger.Info(ctx, "Closing infrastructure connections...")
 		if err := client.Close(); err != nil {
@@ -60,7 +62,8 @@ func run(ctx context.Context, logger ports.Logger, tracer *trace.TracerProvider,
 	logger.Info(ctx, "Successfully loaded HTTP Server config")
 
 	productRepo := repo.NewProductRepository(client.GetGormDB(), logger)
-	productService := service.NewProductService(productRepo, logger)
+	productCachedRepo := repo.NewCachedProductRepository(logger, productRepo, rdb, sfGroup)
+	productService := service.NewProductService(productCachedRepo, logger)
 	productHandler := productHandler.NewProductHandler(logger, productService)
 
 	mapBusinessHandler := servers.MapBusinessRoutes(productHandler, logger, tracer, rdb)
@@ -80,7 +83,7 @@ func run(ctx context.Context, logger ports.Logger, tracer *trace.TracerProvider,
 	return nil
 }
 
-func loadComponents(ctx context.Context) (ports.Logger, *trace.TracerProvider, *postgre.Client, ports.Redis) {
+func loadComponents(ctx context.Context) (ports.Logger, *trace.TracerProvider, *postgre.Client, *redisV9.Client, *singleflight.Group) {
 	// Configuration
 	configPath := "./configs"
 	cfg, err := config.NewLoggingConfig(configPath)
@@ -123,5 +126,8 @@ func loadComponents(ctx context.Context) (ports.Logger, *trace.TracerProvider, *
 	rdb := redis.NewRedisClient(logger, redisConfig)
 	logger.Info(ctx, "Successful redis connection")
 
-	return logger, tracer, client, rdb
+	// Allocate the singleflight group
+	sfGroup := &singleflight.Group{}
+
+	return logger, tracer, client, rdb, sfGroup
 }
