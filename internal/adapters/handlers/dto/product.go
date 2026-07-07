@@ -1,13 +1,16 @@
 // Package dto will domain related request/response related dto
 package dto
 
-import "github.com/google/uuid"
+import (
+	"github.com/google/uuid"
+	"github.com/yerdauletzhumabay/backend-mypizza-golang/internal/core/domain"
+)
+
+// START of GetCityAllCategoryProducts
 
 type GetCityAllCategoryProductsRequest struct {
 	CityName string `json:"city_name" validate:"required,min=3,max=50"`
 }
-
-// START of GetCityAllCategoryProducts
 
 // nolint:govet
 type GetCityAllCategoryProductsResponse struct {
@@ -34,3 +37,24 @@ type CatalogProduct struct {
 }
 
 // END of GetCityAllCategoryProducts
+
+// START of catalog product query
+
+type CatalogProductQueryRequest struct {
+	CityName    string `json:"city_name" validate:"required,min=3,max=50"`
+	ProductName string `json:"name" validate:"required,min=3,max=50"`
+}
+
+type CatalogProductQueryResponse struct {
+	results []CatalogProductQueryResult
+}
+
+type CatalogProductQueryResult struct {
+	ProductID   uuid.UUID
+	ProductName string
+	ImageUrl    string
+	Price       int64
+	Currency    domain.CurrencyName
+}
+
+// END of catalog product query
