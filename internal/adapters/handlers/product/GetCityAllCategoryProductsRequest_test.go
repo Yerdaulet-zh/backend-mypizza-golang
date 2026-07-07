@@ -133,8 +133,9 @@ func TestGetCityAllCategoriesProducts(t *testing.T) {
 
 // Independent Unit Test targeting the private Mapper logic directly
 func TestMapDomainCityToDtoResponse(t *testing.T) {
+	ctx := context.Background()
 	t.Run("Nil Input Returns Nil", func(t *testing.T) {
-		res := mapDomainCityToDtoResponse(nil)
+		res := mapDomainCityToDtoResponse(ctx, nil)
 		assert.Nil(t, res)
 	})
 
@@ -170,7 +171,7 @@ func TestMapDomainCityToDtoResponse(t *testing.T) {
 			},
 		}
 
-		res := mapDomainCityToDtoResponse(domainCity)
+		res := mapDomainCityToDtoResponse(ctx, domainCity)
 
 		assert.NotNil(t, res)
 		assert.Equal(t, cityID, res.ID)
