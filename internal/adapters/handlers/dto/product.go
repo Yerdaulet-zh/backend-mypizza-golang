@@ -41,20 +41,20 @@ type CatalogProduct struct {
 // START of catalog product query
 
 type CatalogProductQueryRequest struct {
-	CityName    string `json:"city_name" validate:"required,min=3,max=50"`
-	ProductName string `json:"name" validate:"required,min=3,max=50"`
+	CityName string `json:"city_name" validate:"required,min=3,max=50"`
+	Query    string `json:"query" validate:"required,min=3,max=50"`
 }
 
 type CatalogProductQueryResponse struct {
-	results []CatalogProductQueryResult
+	Results []CatalogProductQueryResult `json:"results"`
 }
 
 type CatalogProductQueryResult struct {
-	ProductID   uuid.UUID
-	ProductName string
-	ImageUrl    string
-	Price       int64
-	Currency    domain.CurrencyName
+	ProductID   uuid.UUID           `json:"product_id"`
+	ProductName string              `json:"product_name"`
+	ImageUrl    string              `json:"image_url"`
+	Price       int64               `json:"price"`
+	Currency    domain.CurrencyName `json:"currency_name"`
 }
 
 // END of catalog product query
