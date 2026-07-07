@@ -10,10 +10,10 @@ import (
 )
 
 type redisRateLimiter struct {
-	client ports.Redis
+	client *redis.Client
 }
 
-func NewRateLimiter(client ports.Redis) ports.RateLimiter {
+func NewRateLimiter(client *redis.Client) ports.RateLimiter {
 	return &redisRateLimiter{
 		client: client,
 	}

@@ -1,6 +1,7 @@
 package product
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 
@@ -9,6 +10,7 @@ import (
 	"github.com/yerdauletzhumabay/backend-mypizza-golang/internal/adapters/handlers/response"
 	"github.com/yerdauletzhumabay/backend-mypizza-golang/internal/core/domain"
 	"github.com/yerdauletzhumabay/backend-mypizza-golang/internal/core/ports"
+	"go.opentelemetry.io/otel"
 )
 
 type ProductHandler struct {
@@ -25,6 +27,9 @@ func NewProductHandler(logger ports.Logger, service ports.ProductService) *Produ
 
 func (h *ProductHandler) GetCityAllCategoriesProducts(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
+
+	ctx, span := otel.Tracer("http-handler").Start(ctx, "GetCityAllCategoriesProducts")
+	defer span.End()
 
 	var req dto.GetCityAllCategoryProductsRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -44,12 +49,15 @@ func (h *ProductHandler) GetCityAllCategoriesProducts(w http.ResponseWriter, r *
 		return
 	}
 
-	cityCategoriesProducts := mapDomainCityToDtoResponse(city)
+	cityCategoriesProducts := mapDomainCityToDtoResponse(ctx, city)
 
 	response.Success(ctx, h.logger, w, http.StatusOK, cityCategoriesProducts)
 }
 
-func mapDomainCityToDtoResponse(city *domain.City) *dto.GetCityAllCategoryProductsResponse {
+func mapDomainCityToDtoResponse(ctx context.Context, city *domain.City) *dto.GetCityAllCategoryProductsResponse {
+	ctx, span := otel.Tracer("http-handler").Start(ctx, "http-handler.GetCityAllCategoriesProducts.mapDomainCityToDtoResponse")
+	defer span.End()
+
 	if city == nil {
 		return nil
 	}

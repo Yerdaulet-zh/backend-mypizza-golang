@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	redisV9 "github.com/redis/go-redis/v9"
 	"github.com/yerdauletzhumabay/backend-mypizza-golang/internal/adapters/cache/redis"
 	"github.com/yerdauletzhumabay/backend-mypizza-golang/internal/adapters/handlers"
 	"github.com/yerdauletzhumabay/backend-mypizza-golang/internal/adapters/handlers/middleware"
@@ -37,7 +38,7 @@ func MapManagementRoutes(logger ports.Logger, client ports.Database) http.Handle
 	return mux
 }
 
-func MapBusinessRoutes(productHandler *product.ProductHandler, logger ports.Logger, tracer *trace.TracerProvider, rdb ports.Redis) http.Handler {
+func MapBusinessRoutes(productHandler *product.ProductHandler, logger ports.Logger, tracer *trace.TracerProvider, rdb *redisV9.Client) http.Handler {
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("GET /v1/city/category/products", productHandler.GetCityAllCategoriesProducts)

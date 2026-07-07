@@ -11,6 +11,7 @@ import (
 	"github.com/yerdauletzhumabay/backend-mypizza-golang/internal/adapters/repository/postgresql/persistency/product"
 	"github.com/yerdauletzhumabay/backend-mypizza-golang/internal/core/domain"
 	"github.com/yerdauletzhumabay/backend-mypizza-golang/internal/core/ports"
+	"go.opentelemetry.io/otel"
 	"gorm.io/gorm"
 )
 
@@ -27,6 +28,9 @@ func NewProductRepository(db *gorm.DB, logger ports.Logger) ports.ProductReposit
 }
 
 func (r *ProductRepository) GetCityAllCategoriesProducts(ctx context.Context, cityName string) (*domain.City, error) {
+	ctx, span := otel.Tracer("repo").Start(ctx, "repo.gorm.GetCityAllCategoriesProducts")
+	defer span.End()
+
 	var city product.City
 	err := r.db.WithContext(ctx).
 		Select("id", "name").
