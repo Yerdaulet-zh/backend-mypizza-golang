@@ -16,7 +16,8 @@ import (
 type Product struct {
 	ID         uuid.UUID `gorm:"type:uuid;primaryKey"`
 	CategoryID uuid.UUID `gorm:"type:uuid;index;not null"`
-	Name       string    `gorm:"type:varchar(255);not null"`
+
+	Name string `gorm:"type:varchar(255);index:idx_product_name_trgm,type:gin,expression:name gin_trgm_ops;not null"`
 
 	CreatedAt time.Time      `gorm:"type:timestamptz;default:now();not null"`
 	UpdatedAt time.Time      `gorm:"type:timestamptz;default:now();not null"`
@@ -34,6 +35,25 @@ func (p *Product) BeforeCreate(tx *gorm.DB) error {
 	}
 	p.ID = uuid
 	return nil
+}
+
+func (p *Product) ToDomain() *domain.Product {
+	var deletedAt *time.Time
+	if p.DeletedAt.Valid {
+		deletedAt = &p.DeletedAt.Time
+	}
+	return &domain.Product{
+		ID:         p.ID,
+		CategoryID: p.CategoryID,
+		Name:       p.Name,
+
+		CreatedAt:    p.CreatedAt,
+		UpdatedAt:    p.UpdatedAt,
+		DeletedAt:    deletedAt,
+		Category:     domain.Category{},
+		ProductItems: []domain.ProductItem{},
+		CityProducts: []domain.CityProduct{},
+	}
 }
 
 func ProductMapper(ctx context.Context, logger ports.Logger, city *City) (map[string]*domain.Product, error) {
