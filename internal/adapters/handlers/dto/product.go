@@ -46,15 +46,13 @@ type CatalogProductQueryRequest struct {
 }
 
 type CatalogProductQueryResponse struct {
-	Results []CatalogProductQueryResult `json:"results"`
-}
-
-type CatalogProductQueryResult struct {
-	ProductID   uuid.UUID           `json:"product_id"`
-	ProductName string              `json:"product_name"`
-	ImageUrl    string              `json:"image_url"`
-	Price       int64               `json:"price"`
-	Currency    domain.CurrencyName `json:"currency_name"`
+	CityID        uuid.UUID           `json:"city_id"`
+	ProductID     uuid.UUID           `json:"product_id"`
+	ProductItemID uuid.UUID           `json:"product_item_id"`
+	ProductName   string              `json:"product_name"`
+	ImageUrl      string              `json:"image_url"`
+	Price         int64               `json:"price"`
+	Currency      domain.CurrencyName `json:"currency_name"`
 }
 
 // END of catalog product query
