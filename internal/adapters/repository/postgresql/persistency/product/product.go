@@ -54,7 +54,7 @@ func ProductMapper(ctx context.Context, logger ports.Logger, city *City) (map[st
 	return productMap, nil
 }
 
-func GrouperProductWithProductItem(
+func GrouperMappedProductWithMappedProductItem(
 	ctx context.Context,
 	logger ports.Logger,
 	products map[string]*domain.Product,
