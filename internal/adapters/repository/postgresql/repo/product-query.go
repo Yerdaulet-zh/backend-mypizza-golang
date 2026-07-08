@@ -33,6 +33,7 @@ func (r *ProductRepository) CatalogProductQuery(ctx context.Context, cityName st
           AND cpi.is_available = true
           AND cpi.is_displayed = true
           AND p.name ILIKE ?
+        LIMIT 10
     `
 
 	search := "%" + searchTerms + "%"

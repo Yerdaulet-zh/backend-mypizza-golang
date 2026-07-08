@@ -206,3 +206,15 @@ func (c *CatalogProductQueryIntegrationTestSuite) TestCatalogProductQuery_Result
 		assert.Greater(c.T(), r.Price, int64(0))
 	}
 }
+
+func (c *CatalogProductQueryIntegrationTestSuite) TestCatalogProductQuery_Limit() {
+	ctx := context.Background()
+
+	results, err := c.repo.CatalogProductQuery(ctx, "Shymkent", "а")
+
+	if !assert.NoError(c.T(), err) {
+		return
+	}
+
+	assert.Len(c.T(), results, 10)
+}
