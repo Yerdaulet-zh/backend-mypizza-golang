@@ -42,6 +42,7 @@ func MapBusinessRoutes(productHandler *product.ProductHandler, logger ports.Logg
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("GET /v1/city/category/products", productHandler.GetCityAllCategoriesProducts)
+	mux.HandleFunc("POST /v1/city/catalog/product/query", productHandler.CatalogProductQuery)
 
 	// Middlewares
 	rateLimiter := redis.NewRateLimiter(rdb)

@@ -117,15 +117,15 @@ func (r *ProductRepository) GetCityAllCategoriesProducts(ctx context.Context, ci
 	}
 
 	// Core Alignment: Grouping structural variants with their localized configurations
-	productItems, err = product.GrouperProductItemWithCityProductItem(ctx, r.logger, productItems, cityProductItems)
+	productItems, err = product.GrouperMappedProductItemWithMappedCityProductItem(ctx, r.logger, productItems, cityProductItems)
 	if err != nil {
-		r.logger.Debug(ctx, "Error occured at grouperProductItemWithCityProductItem: "+err.Error())
+		r.logger.Debug(ctx, "Error occured at GrouperMappedProductItemWithMappedCityProductItem: "+err.Error())
 		return nil, err
 	}
 
-	mappedProducts, err = product.GrouperProductWithProductItem(ctx, r.logger, mappedProducts, productItems)
+	mappedProducts, err = product.GrouperMappedProductWithMappedProductItem(ctx, r.logger, mappedProducts, productItems)
 	if err != nil {
-		r.logger.Debug(ctx, "Error occured at grouperProductWithProductItem: "+err.Error())
+		r.logger.Debug(ctx, "Error occured at GrouperMappedProductWithMappedProductItem: "+err.Error())
 		return nil, err
 	}
 

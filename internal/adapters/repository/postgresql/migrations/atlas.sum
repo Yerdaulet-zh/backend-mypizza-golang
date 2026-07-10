@@ -1,4 +1,4 @@
-h1:qNG2sM1865ACQBO8tHPv428n4BnTotA5bEJncdFvz9M=
+h1:Y/mz4BymtRwRHn8ydrshx0amb2C9Qz7wKrsqZWGrSrE=
 20260624105504_create_product_tables.sql h1:6c5ABFq+ltLayNjU03fsrRr5fARZgDhNT+jGynTc7PQ=
 20260624134206_make_product_table_columns_name_imageUrl_non_null.sql h1:Cwb0ok5FZe+tdjrZ902qRUZLXxM+kWThpPSSS2LuBCY=
 20260624141527_add_product_items_and_enums.sql h1:s7Y9o3Ov3ND7HqcQ6sQbJWMtkz528Z1yo+7ZNsWvQkE=
@@ -12,3 +12,4 @@ h1:qNG2sM1865ACQBO8tHPv428n4BnTotA5bEJncdFvz9M=
 20260701072622_add DsiplayOrder column to CityProduct table.sql h1:dCs137Y9hSdcVeguUNz03+sELel/X8t0+F53pJ7bW6I=
 20260701100249_KAN-16: add DisplayOrder column to CityCategory table.sql h1:Ru/s2xhcQWBpmMV2kA7l2QLL2wDnXw9geOdmOnXEPgI=
 20260701104555_KAN-16: add is_available and display_order columns to product_item_ingredient table, this is used to define foe each product item if specific ingredeint is available to sale and display order of ingredeints for the client.sql h1:R2109S4GKt76+goTEDEUArPVJpYNrlMlpUZo1TEzuUY=
+20260708113153_idx_product_name_trgm.sql h1:leADpcM7b4LtqYO/SB14oBslBCiGkFLG5EwFPWR8uXw=
