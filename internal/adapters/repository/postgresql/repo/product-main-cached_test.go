@@ -13,6 +13,7 @@ import (
 	"github.com/stretchr/testify/suite"
 	"github.com/yerdauletzhumabay/backend-mypizza-golang/internal/adapters/logging"
 	"github.com/yerdauletzhumabay/backend-mypizza-golang/internal/core/domain"
+	"github.com/yerdauletzhumabay/backend-mypizza-golang/internal/core/domain/dproduct"
 	"github.com/yerdauletzhumabay/backend-mypizza-golang/internal/core/ports"
 	"golang.org/x/sync/singleflight"
 )
@@ -27,6 +28,10 @@ type CachedRepoTestSuite struct {
 
 type MockDBRepository struct {
 	mock.Mock
+}
+
+func (r *MockDBRepository) CatalogProductQuery(ctx context.Context, cityName string, query string) ([]*dproduct.ProductCatalogQuerySearchResult, error) {
+	return nil, nil
 }
 
 func (m *MockDBRepository) GetCityAllCategoriesProducts(ctx context.Context, cityName string) (*domain.City, error) {
@@ -79,7 +84,6 @@ func (suite *CachedRepoTestSuite) TestGetCityAllCategoriesProducts_CollapsesConc
 	t := suite.T()
 	sfGroup := &singleflight.Group{}
 
-	// Initialize the actual caching repository we want to test
 	repo := NewCachedProductRepository(suite.logger, suite.mockDBRepo, suite.redisClient, sfGroup)
 
 	cityName := "Shymkent"
@@ -88,20 +92,22 @@ func (suite *CachedRepoTestSuite) TestGetCityAllCategoriesProducts_CollapsesConc
 	// EXPECTATION: The DB repository should only be called EXACTLY ONCE
 	suite.mockDBRepo.On("GetCityAllCategoriesProducts", mock.Anything, cityName).
 		Return(expectedCity, nil).
+		Run(func(args mock.Arguments) {
+			// This artificial delay holds the singleflight gate open
+			// so all 10 concurrent requests hit it at the same time!
+			time.Sleep(50 * time.Millisecond)
+		}).
 		Once()
 
 	// Fire concurrent requests using a WaitGroup
 	var wg sync.WaitGroup
 	concurrentRequests := 10
 	results := make([]*domain.City, concurrentRequests)
-	startGate := make(chan struct{})
 
 	for i := 0; i < concurrentRequests; i++ {
 		wg.Add(1)
 		go func(index int) {
 			defer wg.Done()
-			<-startGate // Wait here until the gate opens
-
 			res, err := repo.GetCityAllCategoriesProducts(context.Background(), cityName)
 			if err == nil {
 				results[index] = res
@@ -109,18 +115,17 @@ func (suite *CachedRepoTestSuite) TestGetCityAllCategoriesProducts_CollapsesConc
 		}(i)
 	}
 
-	// Open the gate! All goroutines dogpile the endpoint simultaneously
-	close(startGate)
 	wg.Wait()
 
 	// Assertions
-	suite.mockDBRepo.AssertExpectations(t) // Verifies DB was hit exactly once
+	suite.mockDBRepo.AssertExpectations(t)
 	for _, res := range results {
-		assert.NotNil(t, res)
-		assert.Equal(t, cityName, res.Name)
+		if assert.NotNil(t, res) {
+			assert.Equal(t, cityName, res.Name)
+		}
 	}
 
 	// Give the background goroutine a split second to save to miniredis
-	time.Sleep(50 * time.Millisecond)
+	time.Sleep(10 * time.Millisecond)
 	assert.True(t, suite.redisServer.Exists("city:categories:products:Shymkent"))
 }

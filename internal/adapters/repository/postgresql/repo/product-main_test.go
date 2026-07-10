@@ -49,6 +49,11 @@ func (s *ProductRepoIntegrationTestSuite) SetupSuite() {
 		s.T().Fatalf("Failed to dynamically initialize custom database enum types: %v", err)
 	}
 
+	// Install pg_trgm on the clean test DB
+	if err := s.db.Exec("CREATE EXTENSION IF NOT EXISTS pg_trgm;").Error; err != nil {
+		s.T().Fatalf("failed to create pg_trgm extension: %v", err)
+	}
+
 	err = s.db.AutoMigrate(
 		&product.City{},
 		&product.Category{},
